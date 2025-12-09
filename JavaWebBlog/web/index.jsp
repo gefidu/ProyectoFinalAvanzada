@@ -91,8 +91,8 @@
 
             <footer class="footer mt-5">
                 <div class="container text-center">
-                    <p class="mb-0 text-muted">&copy; 2025 Odally - Blog Moderno y Elegante</p>
-                    <p class="mb-0 text-muted">Alejandra Munevar, Dylan Silva, Sergio Moreno</p>
+                    <p class="mb-0">&copy; 2025 Odally - Blog Moderno y Elegante</p>
+                    <p class="mb-0">Alejandra Munevar, Dylan Silva, Sergio Moreno</p>
                 </div>
             </footer>
 
