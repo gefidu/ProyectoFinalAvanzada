@@ -269,10 +269,11 @@ public class ConexionBD {
             
         } catch (SQLException e) {
             if (retriesLeft > 0) {
+                int currentAttempt = maxRetries - retriesLeft + 1;
                 long delay = initialRetryDelayMs * (long) Math.pow(2, maxRetries - retriesLeft);
-                System.err.println("[ConexionBD] Error al obtener conexión. Reintentando en " + delay 
-                    + "ms... (Reintentos restantes: " + retriesLeft + ")");
-                System.err.println("[ConexionBD] Error: " + e.getMessage());
+                System.err.println("[ConexionBD] Intento " + currentAttempt + "/" + maxRetries 
+                    + " fallido: " + e.getMessage());
+                System.err.println("[ConexionBD] Reintentando en " + delay + "ms...");
                 
                 try {
                     Thread.sleep(delay);
@@ -283,8 +284,9 @@ public class ConexionBD {
                 
                 return getConexionWithRetry(retriesLeft - 1);
             } else {
-                System.err.println("[ConexionBD] No se pudo obtener conexión después de " 
-                    + maxRetries + " reintentos.");
+                System.err.println("[ConexionBD] Intento " + maxRetries + "/" + maxRetries 
+                    + " fallido: " + e.getMessage());
+                System.err.println("[ConexionBD] Redirigiendo a página de configuración...");
                 throw new SQLException("No se pudo conectar a la base de datos después de " 
                     + maxRetries + " reintentos. Error: " + e.getMessage(), e);
             }
@@ -440,6 +442,47 @@ public class ConexionBD {
             }
             return String.format("Pool Stats - Total: %d, En uso: %d, Disponibles: %d, Máximo: %d",
                     total, inUse, total - inUse, maxConnections);
+        }
+    }
+
+    /**
+     * Verifica si la conexión a la base de datos está disponible
+     * Intenta obtener una conexión sin reintentos para validación rápida
+     * 
+     * @return true si la conexión es exitosa, false en caso contrario
+     */
+    public static boolean verificarConexion() {
+        try {
+            ConexionBD instance = getInstancia();
+            Connection conn = instance.getConexion();
+            if (conn != null) {
+                instance.cerrarConexion(conn);
+                return true;
+            }
+        } catch (Exception e) {
+            System.err.println("[ConexionBD] Verificación de conexión fallida: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
+     * Verifica la conexión con parámetros personalizados (sin usar el pool)
+     * Útil para probar configuraciones antes de guardarlas
+     * 
+     * @param url URL de conexión JDBC
+     * @param user Usuario de la base de datos
+     * @param password Contraseña del usuario
+     * @return true si la conexión es exitosa
+     */
+    public static boolean verificarConexionConParametros(String url, String user, String password) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            try (Connection conn = DriverManager.getConnection(url, user, password)) {
+                return conn != null && !conn.isClosed();
+            }
+        } catch (Exception e) {
+            System.err.println("[ConexionBD] Error al verificar conexión con parámetros: " + e.getMessage());
+            return false;
         }
     }
 }

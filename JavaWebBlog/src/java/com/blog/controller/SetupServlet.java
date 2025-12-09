@@ -1,5 +1,6 @@
 package com.blog.controller;
 
+import com.blog.filter.DatabaseCheckFilter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -62,6 +63,8 @@ public class SetupServlet extends HttpServlet {
 
             // Save the configuration
             if (saveConfiguration(url, user, password)) {
+                // Invalidate the DatabaseCheckFilter cache to force a new check
+                DatabaseCheckFilter.invalidateCache();
                 response.sendRedirect(request.getContextPath() + "/setup?success=true");
             } else {
                 response.sendRedirect(request.getContextPath() + "/setup?error=save&host=" + host + 
