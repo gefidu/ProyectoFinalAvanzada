@@ -9,8 +9,58 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Aplicación del principio de Sustitución de Liskov: puede usarse en lugar de
- * la interfaz
+ * Implementación MySQL del patrón DAO para operaciones de usuarios.
+ * 
+ * <p>Esta clase proporciona la implementación concreta de {@link IUsuarioDAO} usando
+ * MySQL como sistema de gestión de base de datos. Maneja todas las operaciones CRUD
+ * y de autenticación para usuarios, con énfasis en la seguridad mediante el uso de
+ * contraseñas hasheadas y PreparedStatements.</p>
+ * 
+ * <h3>Características de resiliencia:</h3>
+ * <ul>
+ *   <li><b>Reintentos automáticos:</b> Las operaciones se reintentan hasta 2 veces
+ *   con backoff exponencial en caso de fallo</li>
+ *   <li><b>Pool de conexiones:</b> Utiliza el pool de {@link ConexionBD} para
+ *   gestión eficiente de conexiones</li>
+ *   <li><b>Gestión de errores:</b> Manejo robusto de errores de constraint violations
+ *   (ej: username duplicado)</li>
+ * </ul>
+ * 
+ * <h3>Principios SOLID aplicados:</h3>
+ * <ul>
+ *   <li><b>S - Single Responsibility Principle (SRP):</b> Esta clase solo se encarga
+ *   de la persistencia de usuarios en MySQL. Ver Sección 2.1.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>L - Liskov Substitution Principle (LSP):</b> Cumple completamente el contrato
+ *   de {@link IUsuarioDAO}, puede sustituirse sin romper funcionalidad.
+ *   Ver Sección 2.1.3 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>D - Dependency Inversion Principle (DIP):</b> Los controladores dependen de
+ *   la interfaz {@link IUsuarioDAO}, no de esta clase concreta. Ver Sección 2.1.5 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Patrón de diseño:</h3>
+ * <ul>
+ *   <li><b>DAO (Data Access Object):</b> Encapsula toda la lógica de acceso a datos
+ *   de usuarios. Ver Sección 2.4.2 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>Singleton (indirecto):</b> Utiliza {@link ConexionBD} que implementa Singleton.
+ *   Ver Sección 2.4.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Seguridad:</h3>
+ * <ul>
+ *   <li><b>Prevención de SQL Injection:</b> Usa PreparedStatements en todas las consultas</li>
+ *   <li><b>Contraseñas hasheadas:</b> Trabaja solo con contraseñas ya hasheadas por
+ *   {@link com.blog.util.PasswordUtil}</li>
+ *   <li><b>Protección de admin principal:</b> Previene eliminación del usuario admin con ID 1</li>
+ * </ul>
+ * 
+ * @author Dylan David Silva Orrego
+ * @author Maria Alejandra Munevar Barrera
+ * @version 1.0
+ * @since 2025-12-09
+ * @see com.blog.dao.IUsuarioDAO
+ * @see com.blog.dao.ConexionBD
+ * @see com.blog.model.Usuario
+ * @see com.blog.util.PasswordUtil
  */
 public class MySQLUsuarioDAO implements IUsuarioDAO {
 

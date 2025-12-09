@@ -12,19 +12,93 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
- * ConexionBD - Clase Singleton para gestionar la conexión a la base de datos
- * con pool de conexiones manual y reconexión automática
+ * Clase Singleton para gestionar el pool de conexiones a la base de datos MySQL.
  * 
- * Principio SOLID aplicado: S - Single Responsibility Principle
- * (Responsabilidad Única).
- * Ver Sección 1.1 en PRINCIPIOS_Y_PATRONES.tex
+ * <p>Esta clase implementa un pool de conexiones manual (sin dependencias externas) que
+ * gestiona eficientemente las conexiones a MySQL mediante reutilización, validación automática
+ * y reconexión con reintentos exponenciales. Es el núcleo del sistema de persistencia.</p>
  * 
- * Patrón de Diseño: Singleton + Object Pool.
- * Ver Sección 3.1 en PRINCIPIOS_Y_PATRONES.tex
+ * <h3>Características del pool de conexiones:</h3>
+ * <ul>
+ *   <li><b>Tamaño dinámico:</b> Crece de {@code minConnections} a {@code maxConnections}
+ *   según la demanda</li>
+ *   <li><b>Validación automática:</b> Las conexiones se validan antes de usarse con
+ *   {@code testOnBorrow}</li>
+ *   <li><b>Limpieza de inactivas:</b> Cierra conexiones que han estado inactivas por más
+ *   de 30 minutos</li>
+ *   <li><b>Reintentos con backoff exponencial:</b> Hasta 3 intentos con delays crecientes</li>
+ *   <li><b>Thread-safe:</b> Uso de sincronización para acceso concurrente seguro</li>
+ * </ul>
  * 
- * Esta clase tiene una única misión en la vida: darnos conexiones a la base de
- * datos de forma confiable y eficiente.
- * Implementa un pool de conexiones simple sin dependencias externas.
+ * <h3>Configuración (db.properties):</h3>
+ * <pre>
+ * db.url=jdbc:mysql://localhost:3306/blog_db?useSSL=false&serverTimezone=UTC
+ * db.user=root
+ * db.password=
+ * pool.minConnections=2
+ * pool.maxConnections=10
+ * retry.maxAttempts=3
+ * retry.initialDelayMs=1000
+ * connection.timeoutSeconds=10
+ * validation.timeoutSeconds=5
+ * connection.maxIdleMinutes=30
+ * </pre>
+ * 
+ * <h3>Principios SOLID aplicados:</h3>
+ * <ul>
+ *   <li><b>S - Single Responsibility Principle (SRP):</b> Esta clase tiene una única
+ *   responsabilidad: gestionar conexiones a la base de datos. No valida usuarios,
+ *   no ejecuta queries, solo proporciona conexiones. Ver Sección 2.1.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>D - Dependency Inversion Principle (DIP):</b> Los DAOs dependen de esta
+ *   clase para obtener conexiones, invirtiendo la dependencia de bajo nivel.
+ *   Ver Sección 2.1.5 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Patrones de diseño:</h3>
+ * <ul>
+ *   <li><b>Singleton (Thread-Safe):</b> Garantiza una única instancia usando double-checked
+ *   locking con volatile. Ver Sección 2.4.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>Object Pool:</b> Reutiliza conexiones costosas en lugar de crear nuevas.
+ *   Ver Sección 2.4.4 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Resiliencia y manejo de errores:</h3>
+ * <p>El sistema implementa múltiples estrategias para garantizar disponibilidad:</p>
+ * <ul>
+ *   <li><b>Reintentos automáticos:</b> Si una conexión falla, se reintenta hasta 3 veces</li>
+ *   <li><b>Backoff exponencial:</b> Los delays aumentan exponencialmente (1s, 2s, 4s)</li>
+ *   <li><b>Validación proactiva:</b> Se ejecuta {@code SELECT 1} antes de entregar conexiones</li>
+ *   <li><b>Recreación automática:</b> Las conexiones inválidas se cierran y recrean</li>
+ * </ul>
+ * 
+ * <h3>Ejemplo de uso:</h3>
+ * <pre>{@code
+ * // Obtener la instancia Singleton
+ * ConexionBD conexionBD = ConexionBD.getInstancia();
+ * 
+ * // Obtener una conexión del pool
+ * Connection conn = null;
+ * try {
+ *     conn = conexionBD.getConexion();
+ *     // Usar la conexión...
+ * } finally {
+ *     if (conn != null) {
+ *         conexionBD.cerrarConexion(conn); // Devolver al pool
+ *     }
+ * }
+ * }</pre>
+ * 
+ * <h3>Nota importante:</h3>
+ * <p>Las conexiones obtenidas de {@link #getConexion()} DEBEN devolverse al pool
+ * usando {@link #cerrarConexion(Connection)}. No usar {@code conn.close()} directamente.</p>
+ * 
+ * @author Dylan David Silva Orrego
+ * @author Maria Alejandra Munevar Barrera
+ * @version 2.0
+ * @since 2025-12-09
+ * @see java.sql.Connection
+ * @see com.blog.dao.MySQLArticuloDAO
+ * @see com.blog.dao.MySQLUsuarioDAO
  */
 public class ConexionBD {
 

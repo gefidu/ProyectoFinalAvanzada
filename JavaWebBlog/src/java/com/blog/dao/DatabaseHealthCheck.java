@@ -9,10 +9,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * DatabaseHealthCheck - Clase de utilidad para verificar la salud de la base de datos
+ * Clase de utilidad para verificar el estado de salud de la base de datos.
  * 
- * Proporciona métodos para verificar la disponibilidad de la base de datos,
- * la existencia de tablas y la conectividad general del sistema.
+ * <p>Esta clase proporciona métodos diagnósticos para verificar la disponibilidad,
+ * estructura y funcionalidad de la base de datos MySQL. Es especialmente útil durante
+ * el despliegue inicial o para troubleshooting de problemas de conectividad.</p>
+ * 
+ * <h3>Verificaciones disponibles:</h3>
+ * <ul>
+ *   <li><b>Disponibilidad:</b> Verifica que MySQL esté ejecutándose y acepte conexiones</li>
+ *   <li><b>Existencia de tablas:</b> Verifica que las tablas 'usuarios' y 'articulos' existan</li>
+ *   <li><b>Estructura de tablas:</b> Verifica que las tablas tengan las columnas requeridas</li>
+ *   <li><b>Análisis de errores:</b> Proporciona mensajes descriptivos de errores comunes</li>
+ * </ul>
+ * 
+ * <h3>Principios SOLID aplicados:</h3>
+ * <ul>
+ *   <li><b>S - Single Responsibility Principle (SRP):</b> Esta clase tiene una única
+ *   responsabilidad: diagnosticar el estado de la base de datos. Ver Sección 2.1.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Otros principios de diseño:</h3>
+ * <ul>
+ *   <li><b>DRY (Don't Repeat Yourself):</b> Centraliza la lógica de diagnóstico en
+ *   un solo lugar. Ver Sección 2.3.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>KISS (Keep It Simple, Stupid):</b> API simple con resultados claros.
+ *   Ver Sección 2.3.2 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Ejemplo de uso:</h3>
+ * <pre>{@code
+ * DatabaseHealthCheck healthCheck = new DatabaseHealthCheck();
+ * HealthCheckResult result = healthCheck.performCompleteHealthCheck();
+ * 
+ * if (result.isHealthy()) {
+ *     System.out.println("Base de datos OK: " + result.getMessage());
+ * } else {
+ *     System.err.println("Problemas detectados: " + result.getMessage());
+ *     for (String issue : result.getIssues()) {
+ *         System.err.println("  - " + issue);
+ *     }
+ * }
+ * }</pre>
+ * 
+ * @author Dylan David Silva Orrego
+ * @author Maria Alejandra Munevar Barrera
+ * @version 1.0
+ * @since 2025-12-09
+ * @see com.blog.dao.ConexionBD
+ * @see com.blog.controller.SetupServlet
  */
 public class DatabaseHealthCheck {
 
