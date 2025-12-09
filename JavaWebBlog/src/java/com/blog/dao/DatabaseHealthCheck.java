@@ -132,7 +132,7 @@ public class DatabaseHealthCheck {
             sqlState != null && sqlState.equals("42000")) {
             return "La base de datos 'blog_db' no existe. Debe:\n" +
                    "  1. Crear la base de datos ejecutando: CREATE DATABASE blog_db;\n" +
-                   "  2. Ejecutar el script schema.sql para crear las tablas";
+                   "  2. Ejecutar el script setup_database.sql o database/schema.sql para crear las tablas";
         }
 
         // Error de driver no encontrado
@@ -172,7 +172,7 @@ public class DatabaseHealthCheck {
 
             if (!missingTables.isEmpty()) {
                 HealthCheckResult result = new HealthCheckResult(false, 
-                    "Faltan tablas en la base de datos. Debe ejecutar el script schema.sql.");
+                    "Faltan tablas en la base de datos. Debe ejecutar el script setup_database.sql o database/schema.sql.");
                 for (String tableName : missingTables) {
                     result.addIssue("La tabla '" + tableName + "' no existe");
                 }

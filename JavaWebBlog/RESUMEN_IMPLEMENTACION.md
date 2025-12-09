@@ -52,7 +52,7 @@ Métodos implementados:
 
 Mensajes de error mejorados:
 - ✅ "No se puede conectar a MySQL. Verifique que MySQL esté ejecutándose."
-- ✅ "La base de datos 'blog_db' no existe. Ejecute el script schema.sql."
+- ✅ "La base de datos 'blog_db' no existe. Ejecute el script setup_database.sql."
 - ✅ "Error de autenticación. Verifique el usuario y contraseña."
 - ✅ Y más mensajes específicos según el tipo de error
 

@@ -49,7 +49,9 @@ USE blog_db;
 -- 3. Ejecutar el script de creación de tablas
 -- *** IMPORTANTE: REEMPLAZA ESTA RUTA CON LA TUYA ***
 -- La ruta debe apuntar al archivo schema.sql en TU computador
-SOURCE C:/Users/TU_USUARIO/Documents/GitHub/ProyectoFinalAvanzada/JavaWebBlog/database/schema.sql;
+-- Ejemplo Windows: C:/Users/TU_USUARIO/ruta/a/JavaWebBlog/database/schema.sql
+-- Ejemplo Mac/Linux: /Users/TU_USUARIO/ruta/a/JavaWebBlog/database/schema.sql
+SOURCE C:/Users/TU_USUARIO/ruta/a/JavaWebBlog/database/schema.sql;
 
 -- 4. Verificar que las tablas se crearon correctamente
 SHOW TABLES;
@@ -93,17 +95,29 @@ OPCIÓN C - Comandos completos (copiar y pegar todo junto):
 Si tienes la ruta correcta al archivo schema.sql, copia ESTE BLOQUE COMPLETO
 y pégalo en MySQL Shell (reemplaza la ruta primero):
 
+IMPORTANTE: La ruta debe ser la ubicación de JavaWebBlog/database/schema.sql 
+en TU computador.
+
 ```sql
 -- Configuración completa de base de datos
 CREATE DATABASE IF NOT EXISTS blog_db;
 USE blog_db;
 
--- *** CAMBIA ESTA RUTA ***
-SOURCE /ruta/completa/a/ProyectoFinalAvanzada/JavaWebBlog/database/schema.sql;
+-- *** CAMBIA ESTA RUTA A LA UBICACIÓN EN TU COMPUTADOR ***
+-- Ejemplo Windows: C:/Users/TU_USUARIO/ruta/a/JavaWebBlog/database/schema.sql
+-- Ejemplo Mac/Linux: /Users/TU_USUARIO/ruta/a/JavaWebBlog/database/schema.sql
+SOURCE /ruta/completa/a/JavaWebBlog/database/schema.sql;
 
 SHOW TABLES;
 SELECT 'Base de datos configurada correctamente' AS Status;
 ```
+
+OPCIÓN D - Usar el script setup_database.sql (MÁS FÁCIL):
+------------------------------------------------------------
+
+El proyecto incluye un script completo que NO requiere el archivo schema.sql.
+Simplemente copia el contenido de: JavaWebBlog/setup_database.sql
+y pégalo completo en MySQL Shell. ¡Este es el método recomendado!
 
 
 ## PASO 3: VERIFICAR LA CONEXIÓN
