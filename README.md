@@ -164,19 +164,36 @@ web/WEB-INF/lib/
 
 ### Configurar la Conexión a la Base de Datos
 
-Editar el archivo `src/java/com/blog/dao/ConexionBD.java`:
+**Odally** ofrece dos métodos para configurar la conexión a la base de datos:
 
-```java
-private static final String URL = "jdbc:mysql://localhost:3306/blog_db?useSSL=false&serverTimezone=UTC";
-private static final String USUARIO = "root";  // Tu usuario de MySQL
-private static final String PASSWORD = "";      // Tu contraseña de MySQL
+#### Opción 1: Interfaz Web de Configuración (Recomendado) ⭐
+
+1. Al iniciar la aplicación por primera vez, si la conexión a la base de datos falla, será redirigido automáticamente a la página de configuración
+2. También puede acceder manualmente a: `http://localhost:8080/AdvancedFinalProject/setup`
+3. Complete el formulario con los datos de su servidor MySQL:
+   - **Host**: localhost (o la dirección de su servidor)
+   - **Puerto**: 3306 (puerto por defecto de MySQL)
+   - **Base de datos**: blog_db
+   - **Usuario**: root (o su usuario de MySQL)
+   - **Contraseña**: su contraseña de MySQL (dejar en blanco si no tiene)
+4. Click en "Probar Conexión" para verificar que los datos sean correctos
+5. Si la conexión es exitosa, click en "Guardar Configuración"
+6. La aplicación guardará la configuración en `db.properties` y estará lista para usar
+
+#### Opción 2: Edición Manual del Archivo
+
+Editar el archivo `src/java/com/blog/dao/db.properties`:
+
+```properties
+db.url=jdbc:mysql://localhost:3306/blog_db?useSSL=false&serverTimezone=UTC
+db.user=root
+db.password=
 ```
 
 **⚠️ IMPORTANTE - Seguridad:**
-- Las credenciales están hardcodeadas solo para propósitos educativos
-- En producción, usar variables de entorno o un archivo de configuración externo
+- Las credenciales se almacenan en el archivo `db.properties` solo para propósitos educativos
+- En producción, usar variables de entorno o un sistema de gestión de secretos
 - Nunca commitear credenciales reales al repositorio
-- Si usas un usuario diferente a `root` o tienes contraseña, actualiza estos valores
 
 ## 📁 Estructura del Proyecto
 
