@@ -8,17 +8,17 @@
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
 \usepackage{hyperref}
 \usepackage{parskip}
-\usepackage{amsmath} % Paquete matemático
-\usepackage{listings} % Para bloques de código
-\usepackage{xcolor} % Para colores en el código
-\usepackage{caption} % Para personalizar captiones
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
 
 \usepackage{fontspec}
 \setmainfont{Source Sans Pro}
 \setsansfont{Source Sans Pro}
 \setmonofont{Source Code Pro}[Scale=MatchLowercase]
 
-% Configuración de colores para listings (igual a tu configuración original)
+% Configuración de colores para listings
 \definecolor{codebg}{rgb}{0.95,0.95,0.95}
 \definecolor{codeframe}{rgb}{0.82,0.82,0.82}
 \definecolor{keyword}{rgb}{0.0,0.2,0.65}
@@ -49,31 +49,15 @@
   xrightmargin=0pt
 }
 
-\lstset{style=mystyle, language=Python}
-
-\title{\textbf{Prueba de Rangos con Signo de Wilcoxon para Observaciones Pareadas} \\ \large Proyecto Final de Probabilidad y Estadística}
-\author{%
-Álvarez Ortiz Arley Santiago -- 20241020008 \\
-Martínez Pardo Silvana -- 20241020010 \\
-Moreno Granado Sergio Leonardo -- 20242020091 \\
-Rodríguez Camacho Juan Esteban -- 20241020029 \\[1em]
-\emph{Docente:} Diego Alberto Chitiva Huertas
-}
-\date{Semestre 2025-3 \\ Diciembre de 2025, Bogotá D.C.}
-
-% --- PAQUETES AUXILIARES ---
-\usepackage{caption}
-\usepackage[style=apa, backend=biber]{biblatex}
-\addbibresource{references.bib}
-
+\lstset{style=mystyle, language=Java}
 
 \begin{document}
 
-% Portada con logo (comenta la siguiente línea si no tienes la imagen)
+% Portada con logo
 \begin{titlepage}
     \centering
     % Si tienes la imagen UDLogo.png, descomenta la línea siguiente
-    \includegraphics[width=6cm]{figures/UDLogo.png}\\[1cm]
+    % \includegraphics[width=6cm]{figures/UDLogo.png}\\[1cm]
     
     {\LARGE Universidad Distrital Francisco José de Caldas\par}
     {\large Facultad de Ingeniería\par}
@@ -81,18 +65,17 @@ Rodríguez Camacho Juan Esteban -- 20241020029 \\[1em]
     \vspace{2cm}
     
     {\huge\bfseries Manual de Usuario\par}
-    {\huge\bfseries Blog \textit{Odally}\par}
+    {\huge\bfseries Odally | Blog\par}
     \vspace{1.5cm}
     
     {\large
     \begin{tabular}{l}
-    Alejandra Munevar -- 2024 \\
-    Dylan Silva -- 2024 \\
-    Moreno Granado Sergio Leonardo -- 20242020091
+    Dylan David Silva Orrego -- 20242020130 \\
+    Maria Alejandra Munevar Barrera -- 20242020145
     \end{tabular}\par}
     \vspace{1.5cm}
     
-    {\large \emph{Docente:} Lilia Marcela Espinoza Rodríguez\par}
+    {\large \emph{Profesora:} Lilia Marcela Espinosa Rodríguez\par}
     \vspace{2cm}
     
     {\large Proyecto Final de Programación Avanzada\par}
@@ -106,64 +89,606 @@ Rodríguez Camacho Juan Esteban -- 20241020029 \\[1em]
 \newpage
 
 \section{Introducción}
-Este manual tiene como objetivo guiar al usuario en el uso del Sistema de Gestión de Contenidos (Blog). La aplicación permite a los usuarios leer artículos publicados y a los administradores gestionar dicho contenido.
 
-\section{Acceso a la Aplicación}
-Para acceder al sistema, abra su navegador web favorito e ingrese la siguiente dirección URL:
-\begin{center}
-    \texttt{http://localhost:8080/AdvancedFinalProject/}
-\end{center}
+\subsection{¿Qué es Odally | Blog?}
 
-\section{Área Pública}
-Esta sección es accesible para cualquier visitante y no requiere autenticación.
+\textbf{Odally | Blog} es un sistema moderno de gestión de contenidos desarrollado con tecnologías JavaWeb (Servlets/JSP). El proyecto permite a los usuarios visualizar artículos publicados y a los administradores gestionar todo el contenido del blog de manera sencilla e intuitiva.
 
-\subsection{Ver Lista de Artículos}
-Al ingresar a la aplicación, verá la página principal con un listado de los artículos más recientes.
+Este sistema fue desarrollado como proyecto final de la materia Programación Avanzada, aplicando principios SOLID, patrones de diseño y buenas prácticas de ingeniería de software.
+
+\subsection{Propósito del Manual}
+
+Este manual tiene como objetivo guiar a los usuarios finales en el uso del sistema Odally | Blog. Abarca desde la instalación inicial hasta el uso avanzado de las funcionalidades administrativas.
+
+\subsection{Audiencia Objetivo}
+
+Este manual está dirigido a:
 \begin{itemize}
-    \item Cada tarjeta muestra el título, un resumen del contenido, el autor y la fecha de publicación.
+    \item \textbf{Visitantes:} Usuarios que desean leer artículos del blog
+    \item \textbf{Usuarios Registrados:} Personas con cuenta en el sistema
+    \item \textbf{Administradores:} Usuarios con permisos para gestionar contenido y usuarios
+    \item \textbf{Desarrolladores:} Personas que desean instalar y configurar el sistema
 \end{itemize}
 
-\subsection{Leer un Artículo}
-Para leer el contenido completo de un artículo:
+\newpage
+\section{Requisitos del Sistema}
+
+Para ejecutar Odally | Blog, su sistema debe cumplir con los siguientes requisitos:
+
+\subsection{Software Necesario}
+
+\begin{itemize}
+    \item \textbf{Java Development Kit (JDK) 17 o superior}
+    \begin{itemize}
+        \item Descargar de: \url{https://www.oracle.com/java/technologies/downloads/}
+        \item Verificar instalación: \texttt{java -version}
+    \end{itemize}
+    
+    \item \textbf{Apache Tomcat 10 o superior}
+    \begin{itemize}
+        \item Descargar de: \url{https://tomcat.apache.org/download-10.cgi}
+        \item Compatible con Jakarta EE 10
+    \end{itemize}
+    
+    \item \textbf{MySQL Server 8.0 o superior}
+    \begin{itemize}
+        \item Descargar de: \url{https://dev.mysql.com/downloads/mysql/}
+        \item Alternativa: XAMPP (\url{https://www.apachefriends.org/})
+    \end{itemize}
+\end{itemize}
+
+\subsection{Navegadores Compatibles}
+
+El sistema es compatible con las versiones más recientes de:
+\begin{itemize}
+    \item Google Chrome (versión 90+)
+    \item Mozilla Firefox (versión 88+)
+    \item Microsoft Edge (versión 90+)
+    \item Safari (versión 14+)
+\end{itemize}
+
+\subsection{Requisitos de Hardware Mínimos}
+
+\begin{itemize}
+    \item \textbf{Procesador:} Intel Core i3 o equivalente
+    \item \textbf{Memoria RAM:} 4 GB mínimo (8 GB recomendado)
+    \item \textbf{Espacio en Disco:} 500 MB libres
+    \item \textbf{Conexión a Internet:} Necesaria para descarga inicial de dependencias
+\end{itemize}
+
+\newpage
+\section{Instalación}
+
+\subsection{Paso 1: Clonar el Repositorio}
+
+Abra una terminal o símbolo del sistema y ejecute:
+
+\begin{lstlisting}[language=bash]
+git clone https://github.com/gefidu/ProyectoFinalAvanzada.git
+cd ProyectoFinalAvanzada/JavaWebBlog
+\end{lstlisting}
+
+\subsection{Paso 2: Configurar MySQL}
+
+\subsubsection{Iniciar el Servidor MySQL}
+
+\textbf{En Windows con XAMPP:}
 \begin{enumerate}
-    \item Haga clic en el botón \textbf{"Leer más"} ubicado en la parte inferior de la tarjeta del artículo.
-    \item Se abrirá una nueva página con el texto completo.
-    \item Para volver, puede usar el botón \textbf{"Volver al inicio"} o el menú de navegación.
+    \item Abrir el Panel de Control de XAMPP
+    \item Hacer clic en ``Start'' junto a MySQL
+    \item Verificar que el estado sea ``Running''
 \end{enumerate}
 
-\section{Área de Administración}
-Esta sección es exclusiva para usuarios autorizados.
+\textbf{En Linux:}
+\begin{lstlisting}[language=bash]
+sudo systemctl start mysql
+sudo systemctl status mysql
+\end{lstlisting}
+
+\subsubsection{Crear la Base de Datos}
+
+Opción 1 - Usando la línea de comandos:
+\begin{lstlisting}[language=bash]
+mysql -u root -p < setup_database.sql
+\end{lstlisting}
+
+Opción 2 - Usando phpMyAdmin:
+\begin{enumerate}
+    \item Abrir \url{http://localhost/phpmyadmin}
+    \item Hacer clic en ``Nuevo'' para crear una base de datos
+    \item Nombrarla ``blog\_db''
+    \item Ir a la pestaña ``Importar''
+    \item Seleccionar el archivo \texttt{setup\_database.sql}
+    \item Hacer clic en ``Continuar''
+\end{enumerate}
+
+\subsection{Paso 3: Configurar Tomcat en NetBeans}
+
+\begin{enumerate}
+    \item Abrir Apache NetBeans
+    \item Ir a \texttt{Tools → Servers}
+    \item Hacer clic en ``Add Server''
+    \item Seleccionar ``Apache Tomcat or TomEE''
+    \item Especificar la ruta de instalación de Tomcat
+    \item Hacer clic en ``Finish''
+\end{enumerate}
+
+\subsection{Paso 4: Importar el Proyecto}
+
+\begin{enumerate}
+    \item En NetBeans, ir a \texttt{File → Open Project}
+    \item Navegar hasta la carpeta \texttt{JavaWebBlog}
+    \item Seleccionar el proyecto y hacer clic en ``Open Project''
+    \item Hacer clic derecho en el proyecto → ``Properties''
+    \item En ``Run'', seleccionar el servidor Tomcat configurado
+    \item Hacer clic en ``OK''
+\end{enumerate}
+
+\newpage
+\section{Configuración Inicial}
+
+\subsection{Página de Setup de Base de Datos}
+
+Odally | Blog incluye una interfaz web para facilitar la configuración de la conexión a MySQL. Esta es la forma más sencilla de configurar el sistema.
+
+\subsubsection{Acceso a la Página de Setup}
+
+Existen dos formas de acceder:
+
+\textbf{Método 1 - Redirección Automática:}
+\begin{itemize}
+    \item Si el sistema detecta que no puede conectarse a la base de datos, lo redirigirá automáticamente a la página de configuración
+\end{itemize}
+
+\textbf{Método 2 - Acceso Manual:}
+\begin{itemize}
+    \item Navegar directamente a: \url{http://localhost:8080/JavaWebBlog/setup}
+\end{itemize}
+
+\subsubsection{Configurar Usuario y Contraseña de MySQL}
+
+En la página de Setup, complete los siguientes campos:
+
+\begin{itemize}
+    \item \textbf{Host:} localhost (o la dirección IP de su servidor MySQL)
+    \item \textbf{Puerto:} 3306 (puerto por defecto de MySQL)
+    \item \textbf{Base de datos:} blog\_db
+    \item \textbf{Usuario:} root (o su usuario de MySQL)
+    \item \textbf{Contraseña:} su contraseña de MySQL (dejar en blanco si no tiene)
+\end{itemize}
+
+\subsubsection{Probar Conexión}
+
+\begin{enumerate}
+    \item Una vez completados los campos, hacer clic en el botón \textbf{``Probar Conexión''}
+    \item Si la conexión es exitosa, aparecerá un mensaje verde indicando éxito
+    \item Si falla, aparecerá un mensaje de error con detalles del problema
+\end{enumerate}
+
+\textbf{Errores comunes:}
+\begin{itemize}
+    \item ``Connection refused'': MySQL no está ejecutándose
+    \item ``Access denied'': Usuario o contraseña incorrectos
+    \item ``Unknown database'': La base de datos blog\_db no existe
+\end{itemize}
+
+\subsubsection{Ejecutar Script de Base de Datos}
+
+Una vez que la conexión sea exitosa:
+
+\begin{enumerate}
+    \item Hacer clic en el botón \textbf{``Guardar Configuración''}
+    \item El sistema guardará las credenciales en el archivo \texttt{db.properties}
+    \item La aplicación estará lista para usar
+    \item Será redirigido automáticamente a la página principal
+\end{enumerate}
+
+\newpage
+\section{Uso del Sistema - Visitantes}
+
+Los visitantes son usuarios que acceden al blog sin necesidad de autenticarse. Pueden realizar las siguientes acciones:
+
+\subsection{Ver Lista de Artículos}
+
+\begin{enumerate}
+    \item Abrir el navegador web
+    \item Navegar a: \url{http://localhost:8080/JavaWebBlog/articulos}
+    \item Se mostrará la página principal con la lista de artículos recientes
+\end{enumerate}
+
+Cada tarjeta de artículo muestra:
+\begin{itemize}
+    \item Título del artículo
+    \item Resumen del contenido
+    \item Nombre del autor
+    \item Fecha de publicación
+    \item Botón ``Leer más''
+\end{itemize}
+
+\subsection{Leer un Artículo Completo}
+
+\begin{enumerate}
+    \item En la lista de artículos, localizar el artículo de interés
+    \item Hacer clic en el botón \textbf{``Leer más''}
+    \item Se abrirá una nueva página mostrando el contenido completo
+    \item Para volver a la lista, hacer clic en \textbf{``Volver al inicio''}
+\end{enumerate}
+
+\subsection{Registrarse en el Sistema}
+
+\begin{enumerate}
+    \item En la barra de navegación superior, hacer clic en \textbf{``Registrarse''}
+    \item Completar el formulario de registro:
+    \begin{itemize}
+        \item Nombre completo
+        \item Correo electrónico
+        \item Nombre de usuario
+        \item Contraseña
+        \item Confirmar contraseña
+    \end{itemize}
+    \item Hacer clic en el botón \textbf{``Registrarse''}
+    \item Si el registro es exitoso, será redirigido a la página de inicio de sesión
+\end{enumerate}
+
+\textbf{Nota:} Los usuarios registrados comienzan con el rol de ``autor'', lo que les permite crear y gestionar sus propios artículos.
+
+\newpage
+\section{Uso del Sistema - Usuarios Registrados}
+
+Los usuarios registrados tienen acceso a funcionalidades adicionales después de iniciar sesión.
 
 \subsection{Iniciar Sesión}
-1. En la barra de navegación superior, haga clic en \textbf{"Iniciar Sesión"}.
-2. Ingrese su nombre de usuario (ej. \texttt{admin}) y contraseña.
-3. Haga clic en el botón \textbf{"Ingresar"}.
 
-\subsection{Dashboard}
-Una vez autenticado, será redirigido al Dashboard, donde podrá ver estadísticas rápidas sobre el número de artículos publicados.
+\begin{enumerate}
+    \item En la barra de navegación superior, hacer clic en \textbf{``Iniciar Sesión''}
+    \item Ingresar credenciales:
+    \begin{itemize}
+        \item \textbf{Usuario:} su nombre de usuario
+        \item \textbf{Contraseña:} su contraseña
+    \end{itemize}
+    \item Hacer clic en el botón \textbf{``Ingresar''}
+    \item Si las credenciales son correctas, será redirigido al Dashboard
+\end{enumerate}
 
-\subsection{Gestión de Artículos}
-Desde el menú de administración, seleccione \textbf{"Artículos"} para acceder a las opciones de gestión.
-
-\subsubsection{Crear Nuevo Artículo}
-1. Haga clic en el botón verde \textbf{"Nuevo Artículo"}.
-2. Complete el formulario con el \textbf{Título} y el \textbf{Contenido}.
-3. Haga clic en \textbf{"Guardar"}.
-
-\subsubsection{Editar Artículo}
-1. En la lista de artículos, identifique el que desea modificar.
-2. Haga clic en el botón azul \textbf{"Editar"}.
-3. Modifique la información necesaria y haga clic en \textbf{"Actualizar"}.
-
-\subsubsection{Eliminar Artículo}
-1. En la lista de artículos, identifique el que desea borrar.
-2. Haga clic en el botón rojo \textbf{"Eliminar"}.
-3. Confirme la acción si el sistema lo solicita.
+\textbf{Credenciales de prueba:}
+\begin{itemize}
+    \item Usuario: admin | Contraseña: admin123
+    \item Usuario: dylan | Contraseña: admin123
+    \item Usuario: alejandra | Contraseña: admin123
+\end{itemize}
 
 \subsection{Cerrar Sesión}
-Para salir del sistema de forma segura, haga clic en el botón \textbf{"Cerrar Sesión"} ubicado en la esquina superior derecha de la barra de navegación.
 
-% --- BIBLIOGRAFÍA ---
-\printbibliography[title={Bibliografía}]
+\begin{enumerate}
+    \item Hacer clic en el botón \textbf{``Cerrar Sesión''} en la esquina superior derecha
+    \item Será redirigido a la página de inicio
+    \item Su sesión será cerrada de forma segura
+\end{enumerate}
+
+\newpage
+\section{Uso del Sistema - Administradores}
+
+Los administradores tienen acceso completo a todas las funcionalidades del sistema.
+
+\subsection{Acceder al Dashboard}
+
+Una vez autenticado como administrador:
+\begin{enumerate}
+    \item El sistema lo redirige automáticamente al Dashboard
+    \item También puede acceder manualmente a: \url{http://localhost:8080/JavaWebBlog/admin/articulos?action=dashboard}
+\end{enumerate}
+
+El Dashboard muestra:
+\begin{itemize}
+    \item Número total de artículos publicados
+    \item Acceso rápido a gestión de artículos
+    \item Acceso rápido a gestión de usuarios
+\end{itemize}
+
+\subsection{Crear Nuevo Artículo}
+
+\begin{enumerate}
+    \item En el Dashboard o en la lista de artículos, hacer clic en el botón verde \textbf{``Nuevo Artículo''}
+    \item Completar el formulario:
+    \begin{itemize}
+        \item \textbf{Título:} Título del artículo
+        \item \textbf{Contenido:} Texto completo del artículo
+    \end{itemize}
+    \item Hacer clic en \textbf{``Guardar''}
+    \item El artículo será creado y aparecerá en la lista
+\end{enumerate}
+
+\subsection{Editar Artículo Existente}
+
+\begin{enumerate}
+    \item Ir a \texttt{Admin → Artículos}
+    \item En la lista de artículos, localizar el artículo a editar
+    \item Hacer clic en el botón azul \textbf{``Editar''}
+    \item Modificar el título o contenido según sea necesario
+    \item Hacer clic en \textbf{``Actualizar''}
+    \item Los cambios se guardarán inmediatamente
+\end{enumerate}
+
+\subsection{Eliminar Artículo}
+
+\begin{enumerate}
+    \item Ir a \texttt{Admin → Artículos}
+    \item En la lista de artículos, localizar el artículo a eliminar
+    \item Hacer clic en el botón rojo \textbf{``Eliminar''}
+    \item Confirmar la eliminación en el cuadro de diálogo
+    \item El artículo será eliminado permanentemente
+\end{enumerate}
+
+\textbf{Advertencia:} Esta acción no se puede deshacer.
+
+\subsection{Gestionar Usuarios}
+
+\subsubsection{Listar Usuarios}
+
+\begin{enumerate}
+    \item En el menú de administración, hacer clic en \textbf{``Usuarios''}
+    \item Se mostrará una tabla con todos los usuarios del sistema
+    \item La tabla muestra: ID, Nombre, Email, Usuario, Rol
+\end{enumerate}
+
+\subsubsection{Cambiar Rol de Usuario}
+
+\begin{enumerate}
+    \item En la lista de usuarios, localizar el usuario
+    \item En la columna ``Acciones'', hacer clic en:
+    \begin{itemize}
+        \item \textbf{``Promover a Admin''} para otorgar permisos de administrador
+        \item \textbf{``Demover a Autor''} para quitar permisos de administrador
+    \end{itemize}
+    \item El cambio se aplicará inmediatamente
+\end{enumerate}
+
+\textbf{Restricciones:}
+\begin{itemize}
+    \item No se puede cambiar el rol del usuario ``admin'' principal
+    \item No se puede auto-demover su propio rol de administrador
+\end{itemize}
+
+\subsubsection{Eliminar Usuario Individual}
+
+\begin{enumerate}
+    \item En la lista de usuarios, localizar el usuario a eliminar
+    \item Hacer clic en el botón rojo \textbf{``Eliminar''}
+    \item Confirmar la eliminación
+    \item El usuario será eliminado permanentemente
+\end{enumerate}
+
+\textbf{Restricciones:}
+\begin{itemize}
+    \item No se puede eliminar el usuario ``admin'' principal
+    \item No se puede auto-eliminar
+\end{itemize}
+
+\subsubsection{Eliminar Todos los Usuarios No-Administradores}
+
+\begin{enumerate}
+    \item En la lista de usuarios, hacer clic en el botón \textbf{``Eliminar Todos los Autores''}
+    \item Leer cuidadosamente la advertencia
+    \item Confirmar la acción
+    \item Todos los usuarios con rol ``autor'' serán eliminados
+    \item Los administradores no serán afectados
+\end{enumerate}
+
+\textbf{Advertencia:} Esta acción es irreversible y puede eliminar múltiples usuarios a la vez.
+
+\newpage
+\section{Solución de Problemas}
+
+\subsection{El Puerto 8080 Está Ocupado}
+
+\textbf{Síntomas:}
+\begin{itemize}
+    \item Error al iniciar Tomcat: ``Address already in use: bind''
+    \item No se puede acceder a \url{http://localhost:8080}
+\end{itemize}
+
+\subsubsection{Solución con Permisos de Administrador}
+
+\textbf{En Windows:}
+\begin{lstlisting}[language=bash]
+# 1. Identificar el proceso que usa el puerto
+netstat -ano | findstr :8080
+
+# 2. Detener el proceso (reemplazar PID con el número real)
+taskkill /PID <PID> /F
+\end{lstlisting}
+
+\textbf{En Linux/Mac:}
+\begin{lstlisting}[language=bash]
+# 1. Identificar el proceso
+sudo lsof -i :8080
+
+# 2. Detener el proceso
+sudo kill -9 <PID>
+\end{lstlisting}
+
+\subsubsection{Solución SIN Permisos de Administrador (Cambiar Puerto)}
+
+\textbf{Opción 1 - Editar server.xml:}
+\begin{enumerate}
+    \item Navegar a la carpeta de instalación de Tomcat
+    \item Abrir \texttt{conf/server.xml}
+    \item Buscar la línea: \texttt{<Connector port="8080" ...}
+    \item Cambiar ``8080'' por otro puerto (ej: 8081, 9090)
+    \item Guardar y reiniciar Tomcat
+    \item Acceder a: \url{http://localhost:NUEVO_PUERTO/JavaWebBlog/}
+\end{enumerate}
+
+\textbf{Opción 2 - Desde NetBeans:}
+\begin{enumerate}
+    \item Click derecho en el proyecto → Properties
+    \item Ir a ``Run'' → Hacer clic en el botón ``...'' junto al servidor
+    \item Cambiar ``HTTP Port'' a otro puerto disponible
+    \item Aplicar cambios y reiniciar
+\end{enumerate}
+
+\subsection{No Se Puede Conectar a la Base de Datos}
+
+\textbf{Síntomas:}
+\begin{itemize}
+    \item Mensaje de error: ``Cannot connect to database''
+    \item Redirección automática a la página de Setup
+\end{itemize}
+
+\subsubsection{Verificar MySQL Activo}
+
+\textbf{En Windows con XAMPP:}
+\begin{enumerate}
+    \item Abrir el Panel de Control de XAMPP
+    \item Verificar que MySQL esté en estado ``Running''
+    \item Si no está activo, hacer clic en ``Start''
+\end{enumerate}
+
+\textbf{En Linux:}
+\begin{lstlisting}[language=bash]
+sudo systemctl status mysql
+sudo systemctl start mysql
+\end{lstlisting}
+
+\subsubsection{Usar la Página de Setup}
+
+\begin{enumerate}
+    \item Navegar a: \url{http://localhost:8080/JavaWebBlog/setup}
+    \item Ingresar las credenciales correctas de MySQL
+    \item Hacer clic en ``Probar Conexión''
+    \item Si es exitoso, hacer clic en ``Guardar Configuración''
+\end{enumerate}
+
+\subsection{Error al Cargar Contenido}
+
+\textbf{Síntomas:}
+\begin{itemize}
+    \item La página carga pero no muestra artículos
+    \item Errores en la consola del navegador
+\end{itemize}
+
+\subsubsection{Verificar Tablas Creadas}
+
+\begin{lstlisting}[language=sql]
+USE blog_db;
+SHOW TABLES;
+
+-- Debe mostrar:
+-- articulos
+-- usuarios
+
+SELECT COUNT(*) FROM articulos;
+SELECT COUNT(*) FROM usuarios;
+\end{lstlisting}
+
+Si las tablas no existen:
+\begin{enumerate}
+    \item Ejecutar el script \texttt{setup\_database.sql}
+    \item Reiniciar el servidor Tomcat
+    \item Intentar nuevamente
+\end{enumerate}
+
+\newpage
+\section{Preguntas Frecuentes (FAQ)}
+
+\subsection{¿Cómo cambio mi contraseña?}
+
+Actualmente, el sistema no incluye una funcionalidad para que los usuarios cambien su contraseña desde la interfaz web. Un administrador puede actualizar la contraseña directamente en la base de datos ejecutando:
+
+\begin{lstlisting}[language=sql]
+UPDATE usuarios 
+SET password = SHA2('nueva_contraseña', 256) 
+WHERE username = 'nombre_usuario';
+\end{lstlisting}
+
+\subsection{¿Puedo recuperar un artículo eliminado?}
+
+No, la eliminación de artículos es permanente. Se recomienda hacer respaldos regulares de la base de datos.
+
+\subsection{¿Cómo hago un respaldo de la base de datos?}
+
+\textbf{Desde línea de comandos:}
+\begin{lstlisting}[language=bash]
+mysqldump -u root -p blog_db > backup.sql
+\end{lstlisting}
+
+\textbf{Desde phpMyAdmin:}
+\begin{enumerate}
+    \item Seleccionar la base de datos ``blog\_db''
+    \item Ir a la pestaña ``Exportar''
+    \item Seleccionar formato SQL
+    \item Hacer clic en ``Continuar''
+\end{enumerate}
+
+\subsection{¿El sistema soporta múltiples idiomas?}
+
+Actualmente, el sistema está desarrollado únicamente en español.
+
+\subsection{¿Puedo agregar imágenes a los artículos?}
+
+En la versión actual, los artículos solo soportan texto plano. La funcionalidad de imágenes está planificada para futuras versiones.
+
+\subsection{¿Qué navegadores son compatibles?}
+
+El sistema es compatible con las versiones más recientes de Chrome, Firefox, Edge y Safari.
+
+\newpage
+\section{Contacto y Soporte}
+
+\subsection{Equipo de Desarrollo}
+
+\begin{tabular}{ll}
+\textbf{Nombre:} & Dylan David Silva Orrego \\
+\textbf{Código:} & 20242020130 \\
+\textbf{Email:} & ddsilvaO@udistrital.edu.co \\
+\\
+\textbf{Nombre:} & Maria Alejandra Munevar Barrera \\
+\textbf{Código:} & 20242020145 \\
+\textbf{Email:} & mamunevarb@udistrital.edu.co \\
+\end{tabular}
+
+\subsection{Institución}
+
+\textbf{Universidad Distrital Francisco José de Caldas} \\
+Facultad de Ingeniería \\
+Programa de Ingeniería de Sistemas \\
+Bogotá D.C., Colombia
+
+\subsection{Profesora}
+
+\textbf{Lilia Marcela Espinosa Rodríguez} \\
+Programación Avanzada \\
+Semestre 2025-3
+
+\subsection{Repositorio del Proyecto}
+
+El código fuente del proyecto está disponible en GitHub:
+
+\url{https://github.com/gefidu/ProyectoFinalAvanzada}
+
+\subsection{Documentación Adicional}
+
+Para información técnica detallada sobre principios SOLID, patrones de diseño y arquitectura del sistema, consultar:
+
+\begin{itemize}
+    \item \textbf{Principios y Patrones de Diseño:} \texttt{tex archives/Principios/main.tex}
+    \item \textbf{Diagramas del Sistema:} \texttt{tex archives/Diagramas/DIAGRAMS.md}
+    \item \textbf{Anteproyecto:} \texttt{tex archives/Anteproyecto/anteproyecto.tex}
+\end{itemize}
+
+\subsection{Reporte de Errores}
+
+Si encuentra algún error o tiene sugerencias de mejora, puede:
+\begin{itemize}
+    \item Contactar directamente al equipo de desarrollo
+    \item Crear un issue en el repositorio de GitHub
+    \item Enviar un correo electrónico a la profesora del curso
+\end{itemize}
+
+\vspace{2cm}
+
+\begin{center}
+\textit{Gracias por usar Odally | Blog}
+\end{center}
 
 \end{document}
