@@ -1,5 +1,6 @@
 package com.blog.controller;
 
+import com.blog.dao.ConexionBD;
 import com.blog.filter.DatabaseCheckFilter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -10,9 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Properties;
 
 /**
@@ -75,17 +73,10 @@ public class SetupServlet extends HttpServlet {
 
     /**
      * Tests database connection with the provided parameters
+     * Uses ConexionBD.verificarConexionConParametros to avoid code duplication
      */
     private boolean testConnection(String url, String user, String password) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            try (Connection conn = DriverManager.getConnection(url, user, password)) {
-                return conn != null && !conn.isClosed();
-            }
-        } catch (ClassNotFoundException | SQLException e) {
-            System.err.println("[SetupServlet] Connection test failed: " + e.getMessage());
-            return false;
-        }
+        return ConexionBD.verificarConexionConParametros(url, user, password);
     }
 
     /**
