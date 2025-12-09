@@ -5,12 +5,16 @@
         <data xmlns="http://www.netbeans.org/ns/web-project/3">
             <name>AdvancedFinalProject</name>
             <minimum-ant-version>1.6.5</minimum-ant-version>
+            <explicit-platform explicit-source-supported="true"/>
             <web-module-libraries>
                 <library dirs="200">
                     <file>${libs.jstl.classpath}</file>
                 </library>
                 <library dirs="200">
                     <file>${libs.mysql-connector.classpath}</file>
+                </library>
+                <library dirs="200">
+                    <file>${${lib.dir}/jakarta.servlet-api-6.0.0.jar}</file>
                 </library>
             </web-module-libraries>
             <web-module-additional-libraries/>
