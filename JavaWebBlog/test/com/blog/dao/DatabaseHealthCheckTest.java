@@ -94,8 +94,8 @@ class DatabaseHealthCheckTest {
         assertNotNull(result, "El resultado no debe ser nulo");
         assertNotNull(result.getMessage(), "El mensaje no debe ser nulo");
         
-        // El resultado debe ser healthy o unhealthy, pero no null
-        assertNotNull(result.isHealthy());
+        // El método debe ejecutarse sin excepciones y retornar un resultado válido
+        // El resultado puede ser healthy o unhealthy dependiendo del estado de MySQL
     }
 
     @Test

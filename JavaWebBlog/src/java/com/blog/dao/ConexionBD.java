@@ -239,14 +239,23 @@ public class ConexionBD {
                 return conn;
             }
             
-            // Si no hay conexión disponible y el pool no está lleno, crear una nueva
-            if (connectionPool.size() < maxConnections) {
-                Connection newConn = createNewConnection();
-                PooledConnection pooledConn = new PooledConnection(newConn);
-                pooledConn.setInUse(true);
-                connectionPool.add(pooledConn);
-                System.out.println("[ConexionBD] Nueva conexión creada. Pool size: " + connectionPool.size());
-                return newConn;
+            // Si no hay conexión disponible, intentar crear una nueva con control de concurrencia
+            synchronized (connectionPool) {
+                // Re-verificar después de obtener el lock por si otra thread creó una conexión
+                conn = getConnectionFromPool();
+                if (conn != null) {
+                    return conn;
+                }
+                
+                // Verificar si el pool no está lleno
+                if (connectionPool.size() < maxConnections) {
+                    Connection newConn = createNewConnection();
+                    PooledConnection pooledConn = new PooledConnection(newConn);
+                    pooledConn.setInUse(true);
+                    connectionPool.add(pooledConn);
+                    System.out.println("[ConexionBD] Nueva conexión creada. Pool size: " + connectionPool.size());
+                    return newConn;
+                }
             }
             
             // Pool lleno, esperar un poco y reintentar
@@ -338,27 +347,29 @@ public class ConexionBD {
      * Limpia conexiones que han estado inactivas por mucho tiempo
      */
     private void cleanupIdleConnections() {
-        List<PooledConnection> toRemove = new ArrayList<>();
-        
-        for (PooledConnection pooledConn : connectionPool) {
-            synchronized (pooledConn) {
-                if (!pooledConn.isInUse() && pooledConn.getIdleTime() > maxIdleTimeMs) {
-                    // Mantener al menos el mínimo de conexiones
-                    if (connectionPool.size() > minConnections) {
-                        toRemove.add(pooledConn);
-                        try {
-                            pooledConn.connection.close();
-                            System.out.println("[ConexionBD] Conexión inactiva cerrada. Tiempo inactivo: " 
-                                + TimeUnit.MILLISECONDS.toMinutes(pooledConn.getIdleTime()) + " minutos");
-                        } catch (SQLException e) {
-                            System.err.println("[ConexionBD] Error al cerrar conexión inactiva: " + e.getMessage());
+        synchronized (connectionPool) {
+            List<PooledConnection> toRemove = new ArrayList<>();
+            
+            for (PooledConnection pooledConn : connectionPool) {
+                synchronized (pooledConn) {
+                    if (!pooledConn.isInUse() && pooledConn.getIdleTime() > maxIdleTimeMs) {
+                        // Mantener al menos el mínimo de conexiones
+                        if (connectionPool.size() - toRemove.size() > minConnections) {
+                            toRemove.add(pooledConn);
+                            try {
+                                pooledConn.connection.close();
+                                System.out.println("[ConexionBD] Conexión inactiva cerrada. Tiempo inactivo: " 
+                                    + TimeUnit.MILLISECONDS.toMinutes(pooledConn.getIdleTime()) + " minutos");
+                            } catch (SQLException e) {
+                                System.err.println("[ConexionBD] Error al cerrar conexión inactiva: " + e.getMessage());
+                            }
                         }
                     }
                 }
             }
+            
+            connectionPool.removeAll(toRemove);
         }
-        
-        connectionPool.removeAll(toRemove);
     }
 
     /**
