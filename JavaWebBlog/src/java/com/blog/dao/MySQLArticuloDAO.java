@@ -28,133 +28,224 @@ import java.util.List;
 public class MySQLArticuloDAO implements IArticuloDAO {
 
     private final ConexionBD conexionBD;
+    private static final int MAX_OPERATION_RETRIES = 2;
 
     public MySQLArticuloDAO() {
         this.conexionBD = ConexionBD.getInstancia();
     }
 
-    @Override
-    public List<Articulo> listarTodos() throws SQLException {
-        List<Articulo> articulos = new ArrayList<>();
-        // Changed INNER JOIN to LEFT JOIN to ensure articles are shown even if author
-        // is deleted
-        // Used COALESCE to provide a default value for unknown authors
-        String sql = "SELECT a.id, a.titulo, a.contenido, a.fecha_publicacion, a.autor_id, " +
-                "COALESCE(u.nombre, 'Usuario Desconocido') as autor_nombre " +
-                "FROM articulos a " +
-                "LEFT JOIN usuarios u ON a.autor_id = u.id " +
-                "ORDER BY a.fecha_publicacion DESC";
-
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
-
-            while (rs.next()) {
-                Articulo articulo = new Articulo();
-                articulo.setId(rs.getInt("id"));
-                articulo.setTitulo(rs.getString("titulo"));
-                articulo.setContenido(rs.getString("contenido"));
-                articulo.setFechaPublicacion(rs.getTimestamp("fecha_publicacion").toLocalDateTime());
-                articulo.setAutorId(rs.getInt("autor_id"));
-                articulo.setAutorNombre(rs.getString("autor_nombre"));
-                articulos.add(articulo);
+    /**
+     * Ejecuta una operación con reintentos automáticos
+     * 
+     * @param <T> Tipo de retorno
+     * @param operation Operación a ejecutar
+     * @param operationName Nombre de la operación para logging
+     * @return Resultado de la operación
+     * @throws SQLException Error después de todos los reintentos
+     */
+    private <T> T executeWithRetry(DatabaseOperation<T> operation, String operationName) throws SQLException {
+        SQLException lastException = null;
+        
+        for (int attempt = 0; attempt <= MAX_OPERATION_RETRIES; attempt++) {
+            try {
+                return operation.execute();
+            } catch (SQLException e) {
+                lastException = e;
+                if (attempt < MAX_OPERATION_RETRIES) {
+                    System.err.println("[MySQLArticuloDAO] Error en " + operationName + 
+                        ", reintentando... (intento " + (attempt + 1) + "/" + MAX_OPERATION_RETRIES + ")");
+                    try {
+                        Thread.sleep(500 * (attempt + 1)); // Backoff incremental
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new SQLException("Operación interrumpida", ie);
+                    }
+                }
             }
         }
+        
+        // Si llegamos aquí, todos los reintentos fallaron
+        throw new SQLException("Error en " + operationName + " después de " + 
+            (MAX_OPERATION_RETRIES + 1) + " intentos: " + lastException.getMessage(), lastException);
+    }
 
-        return articulos;
+    /**
+     * Interfaz funcional para operaciones de base de datos
+     */
+    @FunctionalInterface
+    private interface DatabaseOperation<T> {
+        T execute() throws SQLException;
+    }
+
+    @Override
+    public List<Articulo> listarTodos() throws SQLException {
+        return executeWithRetry(() -> {
+            List<Articulo> articulos = new ArrayList<>();
+            // Changed INNER JOIN to LEFT JOIN to ensure articles are shown even if author
+            // is deleted
+            // Used COALESCE to provide a default value for unknown authors
+            String sql = "SELECT a.id, a.titulo, a.contenido, a.fecha_publicacion, a.autor_id, " +
+                    "COALESCE(u.nombre, 'Usuario Desconocido') as autor_nombre " +
+                    "FROM articulos a " +
+                    "LEFT JOIN usuarios u ON a.autor_id = u.id " +
+                    "ORDER BY a.fecha_publicacion DESC";
+
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql);
+                        ResultSet rs = stmt.executeQuery()) {
+
+                    while (rs.next()) {
+                        Articulo articulo = new Articulo();
+                        articulo.setId(rs.getInt("id"));
+                        articulo.setTitulo(rs.getString("titulo"));
+                        articulo.setContenido(rs.getString("contenido"));
+                        articulo.setFechaPublicacion(rs.getTimestamp("fecha_publicacion").toLocalDateTime());
+                        articulo.setAutorId(rs.getInt("autor_id"));
+                        articulo.setAutorNombre(rs.getString("autor_nombre"));
+                        articulos.add(articulo);
+                    }
+                }
+                return articulos;
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "listarTodos");
     }
 
     @Override
     public Articulo obtenerPorId(int id) throws SQLException {
-        Articulo articulo = null;
-        String sql = "SELECT a.id, a.titulo, a.contenido, a.fecha_publicacion, a.autor_id, " +
-                "COALESCE(u.nombre, 'Usuario Desconocido') as autor_nombre " +
-                "FROM articulos a " +
-                "LEFT JOIN usuarios u ON a.autor_id = u.id " +
-                "WHERE a.id = ?";
+        return executeWithRetry(() -> {
+            Articulo articulo = null;
+            String sql = "SELECT a.id, a.titulo, a.contenido, a.fecha_publicacion, a.autor_id, " +
+                    "COALESCE(u.nombre, 'Usuario Desconocido') as autor_nombre " +
+                    "FROM articulos a " +
+                    "LEFT JOIN usuarios u ON a.autor_id = u.id " +
+                    "WHERE a.id = ?";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, id);
 
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    articulo = new Articulo();
-                    articulo.setId(rs.getInt("id"));
-                    articulo.setTitulo(rs.getString("titulo"));
-                    articulo.setContenido(rs.getString("contenido"));
-                    articulo.setFechaPublicacion(rs.getTimestamp("fecha_publicacion").toLocalDateTime());
-                    articulo.setAutorId(rs.getInt("autor_id"));
-                    articulo.setAutorNombre(rs.getString("autor_nombre"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            articulo = new Articulo();
+                            articulo.setId(rs.getInt("id"));
+                            articulo.setTitulo(rs.getString("titulo"));
+                            articulo.setContenido(rs.getString("contenido"));
+                            articulo.setFechaPublicacion(rs.getTimestamp("fecha_publicacion").toLocalDateTime());
+                            articulo.setAutorId(rs.getInt("autor_id"));
+                            articulo.setAutorNombre(rs.getString("autor_nombre"));
+                        }
+                    }
+                }
+                return articulo;
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
                 }
             }
-        }
-
-        return articulo;
+        }, "obtenerPorId");
     }
 
     @Override
     public boolean crear(Articulo articulo) throws SQLException {
-        String sql = "INSERT INTO articulos (titulo, contenido, fecha_publicacion, autor_id) VALUES (?, ?, ?, ?)";
+        return executeWithRetry(() -> {
+            String sql = "INSERT INTO articulos (titulo, contenido, fecha_publicacion, autor_id) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, articulo.getTitulo());
+                    stmt.setString(2, articulo.getContenido());
+                    stmt.setTimestamp(3, Timestamp.valueOf(articulo.getFechaPublicacion()));
+                    stmt.setInt(4, articulo.getAutorId());
 
-            stmt.setString(1, articulo.getTitulo());
-            stmt.setString(2, articulo.getContenido());
-            stmt.setTimestamp(3, Timestamp.valueOf(articulo.getFechaPublicacion()));
-            stmt.setInt(4, articulo.getAutorId());
-
-            int filasAfectadas = stmt.executeUpdate();
-            return filasAfectadas > 0;
-        }
+                    int filasAfectadas = stmt.executeUpdate();
+                    return filasAfectadas > 0;
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "crear");
     }
 
     @Override
     public boolean actualizar(Articulo articulo) throws SQLException {
-        String sql = "UPDATE articulos SET titulo = ?, contenido = ?, fecha_publicacion = ? WHERE id = ?";
+        return executeWithRetry(() -> {
+            String sql = "UPDATE articulos SET titulo = ?, contenido = ?, fecha_publicacion = ? WHERE id = ?";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, articulo.getTitulo());
+                    stmt.setString(2, articulo.getContenido());
+                    stmt.setTimestamp(3, Timestamp.valueOf(articulo.getFechaPublicacion()));
+                    stmt.setInt(4, articulo.getId());
 
-            stmt.setString(1, articulo.getTitulo());
-            stmt.setString(2, articulo.getContenido());
-            stmt.setTimestamp(3, Timestamp.valueOf(articulo.getFechaPublicacion()));
-            stmt.setInt(4, articulo.getId());
-
-            int filasAfectadas = stmt.executeUpdate();
-            return filasAfectadas > 0;
-        }
+                    int filasAfectadas = stmt.executeUpdate();
+                    return filasAfectadas > 0;
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "actualizar");
     }
 
     @Override
     public boolean eliminar(int id) throws SQLException {
-        String sql = "DELETE FROM articulos WHERE id = ?";
+        return executeWithRetry(() -> {
+            String sql = "DELETE FROM articulos WHERE id = ?";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, id);
 
-            stmt.setInt(1, id);
-
-            int filasAfectadas = stmt.executeUpdate();
-            return filasAfectadas > 0;
-        }
+                    int filasAfectadas = stmt.executeUpdate();
+                    return filasAfectadas > 0;
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "eliminar");
     }
 
     @Override
     public int contarTotal() throws SQLException {
-        String sql = "SELECT COUNT(*) as total FROM articulos";
+        return executeWithRetry(() -> {
+            String sql = "SELECT COUNT(*) as total FROM articulos";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql);
+                        ResultSet rs = stmt.executeQuery()) {
 
-            if (rs.next()) {
-                return rs.getInt("total");
+                    if (rs.next()) {
+                        return rs.getInt("total");
+                    }
+                }
+                return 0;
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
             }
-        }
-
-        return 0;
+        }, "contarTotal");
     }
 }

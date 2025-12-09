@@ -15,114 +15,197 @@ import java.util.List;
 public class MySQLUsuarioDAO implements IUsuarioDAO {
 
     private final ConexionBD conexionBD;
+    private static final int MAX_OPERATION_RETRIES = 2;
 
     public MySQLUsuarioDAO() {
         this.conexionBD = ConexionBD.getInstancia();
     }
 
-    @Override
-    public Usuario buscarPorUsername(String username) throws SQLException {
-        Usuario usuario = null;
-        String sql = "SELECT id, username, password, nombre, email, rol FROM usuarios WHERE username = ?";
-
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, username);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    usuario = new Usuario();
-                    usuario.setId(rs.getInt("id"));
-                    usuario.setUsername(rs.getString("username"));
-                    usuario.setPassword(rs.getString("password"));
-                    usuario.setNombre(rs.getString("nombre"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setRol(rs.getString("rol"));
+    /**
+     * Ejecuta una operación con reintentos automáticos
+     * 
+     * @param <T> Tipo de retorno
+     * @param operation Operación a ejecutar
+     * @param operationName Nombre de la operación para logging
+     * @return Resultado de la operación
+     * @throws SQLException Error después de todos los reintentos
+     */
+    private <T> T executeWithRetry(DatabaseOperation<T> operation, String operationName) throws SQLException {
+        SQLException lastException = null;
+        
+        for (int attempt = 0; attempt <= MAX_OPERATION_RETRIES; attempt++) {
+            try {
+                return operation.execute();
+            } catch (SQLException e) {
+                lastException = e;
+                if (attempt < MAX_OPERATION_RETRIES) {
+                    System.err.println("[MySQLUsuarioDAO] Error en " + operationName + 
+                        ", reintentando... (intento " + (attempt + 1) + "/" + MAX_OPERATION_RETRIES + ")");
+                    try {
+                        Thread.sleep(500 * (attempt + 1)); // Backoff incremental
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new SQLException("Operación interrumpida", ie);
+                    }
                 }
             }
         }
+        
+        // Si llegamos aquí, todos los reintentos fallaron
+        throw new SQLException("Error en " + operationName + " después de " + 
+            (MAX_OPERATION_RETRIES + 1) + " intentos: " + lastException.getMessage(), lastException);
+    }
 
-        return usuario;
+    /**
+     * Interfaz funcional para operaciones de base de datos
+     */
+    @FunctionalInterface
+    private interface DatabaseOperation<T> {
+        T execute() throws SQLException;
+    }
+
+    @Override
+    public Usuario buscarPorUsername(String username) throws SQLException {
+        return executeWithRetry(() -> {
+            Usuario usuario = null;
+            String sql = "SELECT id, username, password, nombre, email, rol FROM usuarios WHERE username = ?";
+
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, username);
+
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            usuario = new Usuario();
+                            usuario.setId(rs.getInt("id"));
+                            usuario.setUsername(rs.getString("username"));
+                            usuario.setPassword(rs.getString("password"));
+                            usuario.setNombre(rs.getString("nombre"));
+                            usuario.setEmail(rs.getString("email"));
+                            usuario.setRol(rs.getString("rol"));
+                        }
+                    }
+                }
+                return usuario;
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "buscarPorUsername");
     }
 
     @Override
     public Usuario obtenerPorId(int id) throws SQLException {
-        Usuario usuario = null;
-        String sql = "SELECT id, username, password, nombre, email, rol FROM usuarios WHERE id = ?";
+        return executeWithRetry(() -> {
+            Usuario usuario = null;
+            String sql = "SELECT id, username, password, nombre, email, rol FROM usuarios WHERE id = ?";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, id);
 
-            stmt.setInt(1, id);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    usuario = new Usuario();
-                    usuario.setId(rs.getInt("id"));
-                    usuario.setUsername(rs.getString("username"));
-                    usuario.setPassword(rs.getString("password"));
-                    usuario.setNombre(rs.getString("nombre"));
-                    usuario.setEmail(rs.getString("email"));
-                    usuario.setRol(rs.getString("rol"));
+                    try (ResultSet rs = stmt.executeQuery()) {
+                        if (rs.next()) {
+                            usuario = new Usuario();
+                            usuario.setId(rs.getInt("id"));
+                            usuario.setUsername(rs.getString("username"));
+                            usuario.setPassword(rs.getString("password"));
+                            usuario.setNombre(rs.getString("nombre"));
+                            usuario.setEmail(rs.getString("email"));
+                            usuario.setRol(rs.getString("rol"));
+                        }
+                    }
+                }
+                return usuario;
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
                 }
             }
-        }
-
-        return usuario;
+        }, "obtenerPorId");
     }
 
     @Override
     public boolean crear(Usuario usuario) throws SQLException {
-        String sql = "INSERT INTO usuarios (username, password, nombre, email, rol, activo, fecha_creacion) VALUES (?, ?, ?, ?, 'autor', 1, NOW())";
+        return executeWithRetry(() -> {
+            String sql = "INSERT INTO usuarios (username, password, nombre, email, rol, activo, fecha_creacion) VALUES (?, ?, ?, ?, 'autor', 1, NOW())";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, usuario.getUsername());
+                    stmt.setString(2, usuario.getPassword());
+                    stmt.setString(3, usuario.getNombre());
+                    stmt.setString(4, usuario.getEmail());
 
-            stmt.setString(1, usuario.getUsername());
-            stmt.setString(2, usuario.getPassword());
-            stmt.setString(3, usuario.getNombre());
-            stmt.setString(4, usuario.getEmail());
-
-            int filasAfectadas = stmt.executeUpdate();
-            return filasAfectadas > 0;
-        }
+                    int filasAfectadas = stmt.executeUpdate();
+                    return filasAfectadas > 0;
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "crear");
     }
 
     @Override
     public List<Usuario> listarTodos() throws SQLException {
-        List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT id, username, password, nombre, email, rol FROM usuarios ORDER BY nombre";
+        return executeWithRetry(() -> {
+            List<Usuario> usuarios = new ArrayList<>();
+            String sql = "SELECT id, username, password, nombre, email, rol FROM usuarios ORDER BY nombre";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql);
-                ResultSet rs = stmt.executeQuery()) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql);
+                        ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                Usuario usuario = new Usuario();
-                usuario.setId(rs.getInt("id"));
-                usuario.setUsername(rs.getString("username"));
-                usuario.setPassword(rs.getString("password"));
-                usuario.setNombre(rs.getString("nombre"));
-                usuario.setEmail(rs.getString("email"));
-                usuario.setRol(rs.getString("rol"));
-                usuarios.add(usuario);
+                    while (rs.next()) {
+                        Usuario usuario = new Usuario();
+                        usuario.setId(rs.getInt("id"));
+                        usuario.setUsername(rs.getString("username"));
+                        usuario.setPassword(rs.getString("password"));
+                        usuario.setNombre(rs.getString("nombre"));
+                        usuario.setEmail(rs.getString("email"));
+                        usuario.setRol(rs.getString("rol"));
+                        usuarios.add(usuario);
+                    }
+                }
+                return usuarios;
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
             }
-        }
-        return usuarios;
+        }, "listarTodos");
     }
 
     @Override
     public boolean actualizarRol(int id, String nuevoRol) throws SQLException {
-        String sql = "UPDATE usuarios SET rol = ? WHERE id = ?";
+        return executeWithRetry(() -> {
+            String sql = "UPDATE usuarios SET rol = ? WHERE id = ?";
 
-        try (Connection conn = conexionBD.getConexion();
-                PreparedStatement stmt = conn.prepareStatement(sql)) {
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, nuevoRol);
+                    stmt.setInt(2, id);
 
-            stmt.setString(1, nuevoRol);
-            stmt.setInt(2, id);
-
-            return stmt.executeUpdate() > 0;
-        }
+                    return stmt.executeUpdate() > 0;
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "actualizarRol");
     }
 }
