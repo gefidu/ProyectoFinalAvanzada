@@ -8,14 +8,100 @@
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
 \usepackage{hyperref}
 \usepackage{parskip}
+\usepackage{amsmath} % Paquete matemático
+\usepackage{listings} % Para bloques de código
+\usepackage{xcolor} % Para colores en el código
+\usepackage{caption} % Para personalizar captiones
 
-\title{\textbf{Manual de Usuario} \\ \large Sistema de Gestión de Contenidos (Blog) JavaWeb}
-\author{Equipo de Desarrollo}
-\date{\today}
+\usepackage{fontspec}
+\setmainfont{Source Sans Pro}
+\setsansfont{Source Sans Pro}
+\setmonofont{Source Code Pro}[Scale=MatchLowercase]
+
+% Configuración de colores para listings (igual a tu configuración original)
+\definecolor{codebg}{rgb}{0.95,0.95,0.95}
+\definecolor{codeframe}{rgb}{0.82,0.82,0.82}
+\definecolor{keyword}{rgb}{0.0,0.2,0.65}
+\definecolor{comment}{rgb}{0.25,0.5,0.35}
+\definecolor{string}{rgb}{0.58,0.0,0.05}
+\definecolor{linenumber}{rgb}{0.45,0.45,0.45}
+
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framesep=6pt,
+  framerule=0.6pt,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{keyword}\bfseries,
+  commentstyle=\itshape\color{comment},
+  stringstyle=\color{string},
+  numbers=left,
+  numberstyle=\tiny\color{linenumber},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{codeframe}{$\hookrightarrow$}\space},
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=6pt,
+  xrightmargin=0pt
+}
+
+\lstset{style=mystyle, language=Python}
+
+\title{\textbf{Prueba de Rangos con Signo de Wilcoxon para Observaciones Pareadas} \\ \large Proyecto Final de Probabilidad y Estadística}
+\author{%
+Álvarez Ortiz Arley Santiago -- 20241020008 \\
+Martínez Pardo Silvana -- 20241020010 \\
+Moreno Granado Sergio Leonardo -- 20242020091 \\
+Rodríguez Camacho Juan Esteban -- 20241020029 \\[1em]
+\emph{Docente:} Diego Alberto Chitiva Huertas
+}
+\date{Semestre 2025-3 \\ Diciembre de 2025, Bogotá D.C.}
+
+% --- PAQUETES AUXILIARES ---
+\usepackage{caption}
+\usepackage[style=apa, backend=biber]{biblatex}
+\addbibresource{references.bib}
+
 
 \begin{document}
 
-\maketitle
+% Portada con logo (comenta la siguiente línea si no tienes la imagen)
+\begin{titlepage}
+    \centering
+    % Si tienes la imagen UDLogo.png, descomenta la línea siguiente
+    \includegraphics[width=6cm]{figures/UDLogo.png}\\[1cm]
+    
+    {\LARGE Universidad Distrital Francisco José de Caldas\par}
+    {\large Facultad de Ingeniería\par}
+    {\large Ingeniería de Sistemas\par}
+    \vspace{2cm}
+    
+    {\huge\bfseries Manual de Usuario\par}
+    {\huge\bfseries Blog \textit{Odally}\par}
+    \vspace{1.5cm}
+    
+    {\large
+    \begin{tabular}{l}
+    Alejandra Munevar -- 2024 \\
+    Dylan Silva -- 2024 \\
+    Moreno Granado Sergio Leonardo -- 20242020091
+    \end{tabular}\par}
+    \vspace{1.5cm}
+    
+    {\large \emph{Docente:} Lilia Marcela Espinoza Rodríguez\par}
+    \vspace{2cm}
+    
+    {\large Proyecto Final de Programación Avanzada\par}
+    {\large Semestre 2025-3\par}
+    \vfill
+    
+    {\large Diciembre de 2025, Bogotá D.C.\par}
+\end{titlepage}
+
 \tableofcontents
 \newpage
 
@@ -76,5 +162,8 @@ Desde el menú de administración, seleccione \textbf{"Artículos"} para acceder
 
 \subsection{Cerrar Sesión}
 Para salir del sistema de forma segura, haga clic en el botón \textbf{"Cerrar Sesión"} ubicado en la esquina superior derecha de la barra de navegación.
+
+% --- BIBLIOGRAFÍA ---
+\printbibliography[title={Bibliografía}]
 
 \end{document}

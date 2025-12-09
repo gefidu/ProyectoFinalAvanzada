@@ -3,42 +3,89 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish]{babel}
+\usepackage{graphicx}
 \usepackage{geometry}
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
-\usepackage{listings}
-\usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{parskip}
-\usepackage{microtype}
+\usepackage{amsmath} % Paquete matemático
+\usepackage{listings} % Para bloques de código
+\usepackage{xcolor} % Para colores en el código
+\usepackage{caption} % Para personalizar captiones
 
-% Configuración para código Java
-\definecolor{javared}{rgb}{0.6,0,0} % for strings
-\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
-\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
-\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+\usepackage{fontspec}
+\setmainfont{Source Sans Pro}
+\setsansfont{Source Sans Pro}
+\setmonofont{Source Code Pro}[Scale=MatchLowercase]
 
-\lstset{language=Java,
-basicstyle=\ttfamily\small,
-keywordstyle=\color{javapurple}\bfseries,
-stringstyle=\color{javared},
-commentstyle=\color{javagreen},
-morecomment=[s][\color{javadocblue}]{/**}{*/},
-numbers=left,
-numberstyle=\tiny\color{black},
-stepnumber=1,
-numbersep=10pt,
-tabsize=4,
-showspaces=false,
-showstringspaces=false,
-breaklines=true,
-postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}}
+% Configuración de colores para listings (igual a tu configuración original)
+\definecolor{codebg}{rgb}{0.95,0.95,0.95}
+\definecolor{codeframe}{rgb}{0.82,0.82,0.82}
+\definecolor{keyword}{rgb}{0.0,0.2,0.65}
+\definecolor{comment}{rgb}{0.25,0.5,0.35}
+\definecolor{string}{rgb}{0.58,0.0,0.05}
+\definecolor{linenumber}{rgb}{0.45,0.45,0.45}
 
-\title{\textbf{Principios de Ingeniería y Patrones de Diseño} \\ 
-\large Sistema de Gestión de Contenidos (Blog) JavaWeb}
-\author{Equipo de Desarrollo}
-\date{2025}
+\lstdefinestyle{mystyle}{
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  framesep=6pt,
+  framerule=0.6pt,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{keyword}\bfseries,
+  commentstyle=\itshape\color{comment},
+  stringstyle=\color{string},
+  numbers=left,
+  numberstyle=\tiny\color{linenumber},
+  stepnumber=1,
+  numbersep=8pt,
+  showstringspaces=false,
+  breaklines=true,
+  postbreak=\mbox{\textcolor{codeframe}{$\hookrightarrow$}\space},
+  tabsize=2,
+  captionpos=b,
+  xleftmargin=6pt,
+  xrightmargin=0pt
+}
+
+\lstset{style=mystyle, language=Python}
+
 
 \begin{document}
+
+% Portada con logo (comenta la siguiente línea si no tienes la imagen)
+\begin{titlepage}
+    \centering
+    % Si tienes la imagen UDLogo.png, descomenta la línea siguiente
+    \includegraphics[width=6cm]{figures/UDLogo.png}\\[1cm]
+    
+    {\LARGE Universidad Distrital Francisco José de Caldas\par}
+    {\large Facultad de Ingeniería\par}
+    {\large Ingeniería de Sistemas\par}
+    \vspace{2cm}
+    
+    {\huge\bfseries Principios de Ingeniería y Patrones de Diseño\par}
+    {\huge\bfseries Blog \textit{Odally}\par}
+    \vspace{1.5cm}
+    
+    {\large
+    \begin{tabular}{l}
+    Alejandra Munevar -- 2024 \\
+    Dylan Silva -- 2024 \\
+    Moreno Granado Sergio Leonardo -- 20242020091
+    \end{tabular}\par}
+    \vspace{1.5cm}
+    
+    {\large \emph{Docente:} Lilia Marcela Espinosa Rodríguez\par}
+    \vspace{2cm}
+    
+    {\large Proyecto Final de Programación Avanzada\par}
+    {\large Semestre 2025-3\par}
+    \vfill
+    
+    {\large Diciembre de 2025, Bogotá D.C.\par}
+\end{titlepage}
 
 \maketitle
 \tableofcontents
