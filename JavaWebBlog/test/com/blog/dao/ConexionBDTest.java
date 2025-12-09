@@ -36,6 +36,16 @@ class ConexionBDTest {
         assertDoesNotThrow(() -> instancia.cerrarConexion(null));
     }
 
+    @Test
+    @DisplayName("getPoolStats debe retornar estadísticas del pool")
+    void testGetPoolStats() {
+        ConexionBD instancia = ConexionBD.getInstancia();
+        String stats = instancia.getPoolStats();
+        assertNotNull(stats, "Las estadísticas del pool no deben ser nulas");
+        assertTrue(stats.contains("Pool Stats"), "Las estadísticas deben contener 'Pool Stats'");
+        assertTrue(stats.contains("Total:"), "Las estadísticas deben mostrar el total de conexiones");
+    }
+
     // Nota: No podemos probar getConexion sin una base de datos real
     // En un entorno de CI/CD, se podría usar una base de datos en memoria o
     // contenedor
