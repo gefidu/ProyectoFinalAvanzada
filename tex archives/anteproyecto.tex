@@ -1,0 +1,203 @@
+\documentclass[11pt, a4paper]{article}
+
+% Configuración de idioma y codificación
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish, es-tabla]{babel}
+
+% Tipografía solicitada: Source Sans Pro
+% Nota: Requiere tener el paquete 'sourcesanspro' instalado en tu distribución TeX.
+\usepackage[default]{sourcesanspro}
+
+% Márgenes y formato
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{parskip}
+
+% Paquetes adicionales
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{fancyhdr} % Paquete para encabezados
+
+% Configuración de encabezados
+\pagestyle{fancy}
+\fancyhf{} % Limpiar encabezados y pies de página
+\fancyhead[L]{Universidad Distrital Francisco José de Caldas}
+\fancyhead[R]{Anteproyecto}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Configuración de hipervínculos
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,
+    urlcolor=blue,
+}
+
+\title{\textbf{Anteproyecto de Desarrollo de Software: \\ Sistema de Gestión de Contenidos (Blog) JavaWeb}}
+\author{Alejandra Munevar \\ Dylan Silva \\ Sergio Moreno}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty} % Para que la primera página no tenga encabezado
+
+\begin{abstract}
+Este documento presenta la propuesta técnica para el desarrollo de un sistema de gestión de contenidos tipo Blog. El proyecto tiene como objetivo aplicar conocimientos fundamentales de Java, JavaWeb (Servlets/JSP) y bases de datos SQL, implementando una arquitectura robusta basada en el patrón MVC y adhiriéndose a los principios de diseño SOLID para garantizar la mantenibilidad y escalabilidad del software.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{Descripción General}
+El proyecto consiste en una aplicación web dinámica que permite la publicación y gestión de artículos. El sistema contará con dos roles principales: administrador (capaz de gestionar el contenido) y lector (capaz de visualizar el contenido).
+
+La solución se construirá utilizando tecnologías estándar de la industria Java Enterprise, enfocándose en la escritura de código limpio y desacoplado.
+
+\section{Objetivos}
+\subsection{Objetivo General}
+Desarrollar una aplicación web funcional para la gestión de un blog personal utilizando JavaWeb y bases de datos relacionales, aplicando patrones de diseño y buenas prácticas de ingeniería de software.
+
+\subsection{Objetivos Específicos}
+\begin{itemize}
+    \item Implementar el patrón de arquitectura **MVC (Modelo-Vista-Controlador)** para separar la lógica de negocio de la interfaz de usuario.
+    \item Diseñar una base de datos relacional normalizada para la persistencia de datos.
+    \item Aplicar el patrón **DAO (Data Access Object)** para abstraer la capa de persistencia.
+    \item Integrar principios **SOLID** en el diseño de clases para asegurar un bajo acoplamiento.
+    \item Gestionar el control de acceso mediante autenticación simple (Login).
+\end{itemize}
+
+\section{Arquitectura y Diseño Técnico}
+
+\subsection{Stack Tecnológico}
+\begin{itemize}
+    \item \textbf{Lenguaje:} Java (JDK 21+).
+    \item \textbf{Tecnología Web:} Jakarta EE / JavaWeb (Servlets y JSP).
+    \item \textbf{Base de Datos:} MySQL o PostgreSQL.
+    \item \textbf{Servidor de Aplicaciones:} Apache Tomcat 10+.
+    \item \textbf{Frontend:} HTML5, CSS3 (Bootstrap para estilos rápidos), JSTL.
+    \item \textbf{Gestión de Dependencias:} Manual (inclusión de JARs en \texttt{WEB-INF/lib}).
+\end{itemize}
+
+\subsection{Estructura del Proyecto (MVC)}
+El proyecto se dividirá en tres capas lógicas:
+
+\begin{enumerate}
+    \item \textbf{Modelo (Model):}
+    \begin{itemize}
+        \item \textit{Entidades (POJOs):} Clases simples que representan los datos (ej. \texttt{Articulo.java}, \texttt{Usuario.java}).
+        \item \textit{DAOs:} Clases encargadas de las operaciones SQL (CRUD).
+    \end{itemize}
+
+    \item \textbf{Vista (View):}
+    \begin{itemize}
+        \item Archivos \texttt{.jsp} encargados únicamente de la presentación. Se utilizará JSTL para evitar código Java incrustado (Scriptlets) en las vistas.
+    \end{itemize}
+
+    \item \textbf{Controlador (Controller):}
+    \begin{itemize}
+        \item \textit{Servlets:} Reciben las peticiones HTTP (`doGet`, `doPost`), interactúan con el Modelo y redirigen a la Vista adecuada.
+    \end{itemize}
+\end{enumerate}
+
+\section{Alcance y Limitaciones}
+\subsection{Alcance}
+\begin{itemize}
+    \item Gestión completa (CRUD) de artículos por parte del administrador.
+    \item Autenticación de administrador para acceder a las funciones de gestión.
+    \item Visualización pública de la lista de artículos y del detalle de cada uno.
+    \item Diseño responsivo básico utilizando Bootstrap.
+\end{itemize}
+
+\subsection{Limitaciones}
+Para esta fase inicial del proyecto, las siguientes funcionalidades no serán implementadas:
+\begin{itemize}
+    \item Sistema de comentarios en los artículos.
+    \item Múltiples roles de usuario (solo administrador y lector anónimo).
+    \item Funcionalidades de búsqueda avanzada o filtrado por categorías.
+    \item Panel de control avanzado para el administrador.
+\end{itemize}
+
+\section{Riesgos Potenciales}
+\begin{itemize}
+    \item \textbf{Configuración del Entorno:} Pueden surgir dificultades al configurar la compatibilidad entre JDK 21, Apache Tomcat 10 y el IDE.
+    \item \textbf{Gestión de Dependencias Manual:} La descarga de versiones incorrectas o incompatibles de los archivos JAR podría causar errores en tiempo de ejecución.
+    \item \textbf{Conexión a la Base de Datos:} La configuración del driver JDBC y la cadena de conexión puede ser una fuente común de errores iniciales.
+\end{itemize}
+
+\section{Herramientas de Desarrollo}
+\begin{itemize}
+    \item \textbf{IDE:} Apache NetBeans.
+    \item \textbf{Control de Versiones:} Git, para la gestión del código fuente.
+    \item \textbf{Servidor de Aplicaciones:} Apache Tomcat 10+.
+\end{itemize}
+
+\section{Aplicación de Principios SOLID}
+Para garantizar la calidad del código, se aplicarán los siguientes principios explícitamente:
+
+\subsection{S - Single Responsibility Principle (Responsabilidad Única)}
+Cada clase tendrá una única razón para cambiar.
+\begin{itemize}
+    \item La clase \texttt{Articulo} solo definirá la estructura de datos.
+    \item La clase \texttt{ConexionBD} solo gestionará la conexión a la base de datos.
+    \item La clase \texttt{ArticuloServlet} solo procesará las peticiones HTTP, delegando la lógica de negocio.
+\end{itemize}
+
+\subsection{O - Open/Closed Principle (Abierto/Cerrado)}
+El sistema estará abierto a la extensión pero cerrado a la modificación.
+\begin{itemize}
+    \item Se utilizarán interfaces para los DAOs (ej. \texttt{IArticuloDAO}). Si se desea cambiar de MySQL a Oracle, se crea una nueva clase \texttt{OracleArticuloDAO} que implemente la interfaz, sin necesidad de modificar el código de los controladores existentes.
+\end{itemize}
+
+\subsection{L - Liskov Substitution Principle (Sustitución de Liskov)}
+Las clases derivadas deben poder sustituirse por sus clases base.
+\begin{itemize}
+    \item Cualquier implementación de \texttt{IArticuloDAO} garantizará el cumplimiento del contrato de la interfaz. El controlador funcionará correctamente independientemente de si el DAO subyacente guarda los datos en una base de datos SQL, un archivo de texto o una API externa.
+\end{itemize}
+
+\subsection{D - Dependency Inversion Principle (Inversión de Dependencias)}
+Los módulos de alto nivel no dependerán de módulos de bajo nivel; ambos dependerán de abstracciones.
+\begin{itemize}
+    \item El Servlet (\texttt{ArticuloServlet}) no instanciará directamente \texttt{MySQLArticuloDAO}. En su lugar, dependerá de la interfaz \texttt{IArticuloDAO}. La inyección de la dependencia concreta se realizará mediante un Factory o en el constructor.
+\end{itemize}
+
+\section{Diseño de Base de Datos}
+
+\subsection{Modelo Entidad-Relación}
+El sistema constará de las siguientes tablas principales:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Tabla} & \textbf{Campo} & \textbf{Tipo} & \textbf{Descripción} \\ \midrule
+\textbf{usuarios} & id & INT (PK) & Identificador único \\
+ & username & VARCHAR & Nombre de usuario para login \\
+ & password & VARCHAR & Contraseña (Hashed) \\
+ & nombre & VARCHAR & Nombre real del autor \\ \midrule
+\textbf{articulos} & id & INT (PK) & Identificador único \\
+ & titulo & VARCHAR & Título del post \\
+ & contenido & TEXT & Cuerpo del artículo \\
+ & fecha\_pub & DATETIME & Fecha de publicación \\
+ & autor\_id & INT (FK) & Relación con tabla usuarios \\ \bottomrule
+\end{tabular}
+\caption{Esquema básico de Base de Datos}
+\end{table}
+
+\section{Plan de Trabajo}
+El desarrollo se llevará a cabo en las siguientes fases:
+\begin{enumerate}
+    \item \textbf{Fase 1:} Diseño de BD y configuración del entorno (Tomcat).
+    \item \textbf{Fase 2:} Implementación del Modelo y Capa DAO (Backend puro).
+    \item \textbf{Fase 3:} Desarrollo de Vistas (JSP) y Controladores (Servlets) para lectura (Público).
+    \item \textbf{Fase 4:} Implementación del módulo de administración (Login + CRUD completo).
+    \item \textbf{Fase 5:} Pruebas y Refactorización aplicando principios SOLID.
+\end{enumerate}
+
+\end{document}

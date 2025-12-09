@@ -1,0 +1,186 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{microtype}
+
+% Configuración para código Java
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+
+\lstset{language=Java,
+basicstyle=\ttfamily\small,
+keywordstyle=\color{javapurple}\bfseries,
+stringstyle=\color{javared},
+commentstyle=\color{javagreen},
+morecomment=[s][\color{javadocblue}]{/**}{*/},
+numbers=left,
+numberstyle=\tiny\color{black},
+stepnumber=1,
+numbersep=10pt,
+tabsize=4,
+showspaces=false,
+showstringspaces=false,
+breaklines=true,
+postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}}
+
+\title{\textbf{Principios de Ingeniería y Patrones de Diseño} \\ 
+\large Sistema de Gestión de Contenidos (Blog) JavaWeb}
+\author{Equipo de Desarrollo}
+\date{2025}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introducción}
+Este documento es la referencia técnica definitiva sobre las decisiones 
+de diseño tomadas en el proyecto. No solo nos adherimos a los principios 
+SOLID, sino que aplicamos un espectro más amplio de buenas prácticas 
+de ingeniería de software (DRY, KISS, SoC) y patrones de diseño 
+clásicos.
+
+\section{Principios SOLID}
+\subsection{S - Single Responsibility Principle (SRP)}
+\emph{``Una clase debe tener una sola razón para cambiar.''}
+
+\textbf{Aplicación:}
+Separamos la persistencia (DAO), la lógica de control (Servlet) y los 
+datos (Modelo).
+
+\textbf{Referencia en Código:}
+Ver \texttt{com.blog.dao.ConexionBD}.
+\begin{lstlisting}
+// ConexionBD.java
+// RESPONSABILIDAD: Únicamente gestionar conexiones JDBC.
+// No valida usuarios, no formatea fechas, solo conecta.
+public class ConexionBD {
+    // ... lógica de conexión ...
+}
+\end{lstlisting}
+
+\subsection{O - Open/Closed Principle (OCP)}
+\emph{``Abierto a extensión, cerrado a modificación.''}
+
+\textbf{Aplicación:}
+El sistema soporta nuevos motores de base de datos sin tocar los 
+controladores existentes.
+
+\textbf{Referencia en Código:}
+Ver \texttt{com.blog.controller.ArticuloServlet}.
+\begin{lstlisting}
+// ArticuloServlet.java
+// El servlet depende de la abstracción, no de la implementación.
+private IArticuloDAO articuloDAO; 
+// Si mañana usamos Oracle, cambiamos la inyección aquí, 
+// y el resto del código del Servlet permanece intacto.
+\end{lstlisting}
+
+\subsection{L - Liskov Substitution Principle (LSP)}
+\emph{``Las subclases deben ser sustituibles por sus clases base.''}
+
+\textbf{Aplicación:}
+Cualquier implementación de \texttt{IArticuloDAO} funciona en el sistema.
+
+\textbf{Referencia en Código:}
+Ver \texttt{com.blog.dao.MySQLArticuloDAO}.
+\begin{lstlisting}
+// MySQLArticuloDAO.java
+// Cumple estrictamente el contrato (interfaz) IArticuloDAO.
+// No lanza excepciones inesperadas ni cambia el comportamiento esperado.
+public class MySQLArticuloDAO implements IArticuloDAO { ... }
+\end{lstlisting}
+
+\subsection{I - Interface Segregation Principle (ISP)}
+\emph{``Interfaces específicas para clientes específicos.''}
+
+\textbf{Aplicación:}
+Interfaces granulares (\texttt{IArticuloDAO}, \texttt{IUsuarioDAO}) en lugar 
+de un ``God DAO''.
+
+\subsection{D - Dependency Inversion Principle (DIP)}
+\emph{``Depender de abstracciones, no de concreciones.''}
+
+\textbf{Aplicación:}
+Los módulos de alto nivel (Controller) no importan las clases de bajo 
+nivel (MySQL Implementation).
+
+\section{Otros Principios de Ingeniería}
+
+\subsection{DRY (Don't Repeat Yourself)}
+\emph{``Cada pieza de conocimiento debe tener una representación 
+única, inequívoca y autorizada dentro de un sistema.''}
+
+\textbf{Aplicación:}
+\begin{itemize}
+    \item \textbf{JSTL en Vistas:} Utilizamos JSTL (\texttt{c:forEach}, 
+    \texttt{c:url}) para evitar repetir lógica Java (Scriptlets) en 
+    múltiples fragmentos de JSP.
+    \item \textbf{Singleton de Conexión:} La lógica de leer 
+    \texttt{db.properties} y conectar está centralizada en un solo lugar, 
+    no copiada en cada DAO.
+\end{itemize}
+
+\subsection{KISS (Keep It Simple, Stupid)}
+\emph{``La mayoría de los sistemas funcionan mejor si se mantienen 
+simples.''}
+
+\textbf{Aplicación:}
+Mantenemos los POJOs (\texttt{Articulo.java}) libres de lógica compleja. 
+Son estructuras de datos puras.
+\begin{lstlisting}
+// Articulo.java
+// Simpleza absoluta: Campos privados, Getters y Setters.
+// Nada de lógica de negocio oscura.
+public class Articulo implements Serializable { ... }
+\end{lstlisting}
+
+\subsection{SoC (Separation of Concerns)}
+\emph{``Separación de preocupaciones.''}
+
+\textbf{Aplicación:}
+La arquitectura MVC es la encarnación de este principio.
+\begin{itemize}
+    \item \textbf{Vista (JSP):} Solo presentación.
+    \item \textbf{Controlador (Servlet):} Solo orquestación.
+    \item \textbf{Modelo (DAO + Entidades):} Solo datos y negocio.
+\end{itemize}
+
+\section{Patrones de Diseño Aplicados}
+
+\subsection{Singleton Pattern}
+\textbf{Problema:} Necesitamos coordinar el acceso a un recurso compartido (BD).
+\textbf{Solución:} \texttt{ConexionBD} garantiza una única instancia 
+global.
+
+\begin{lstlisting}
+// ConexionBD.java
+public static ConexionBD getInstancia() {
+    if (instancia == null) {
+        instancia = new ConexionBD();
+    }
+    return instancia;
+}
+\end{lstlisting}
+
+\subsection{DAO Pattern (Data Access Object)}
+\textbf{Problema:} El código de negocio no debería contener SQL.
+\textbf{Solución:} Encapsulamos el acceso a datos en clases dedicadas 
+(\texttt{MySQLArticuloDAO}), abstraídas por interfaces.
+
+\subsection{MVC Pattern (Model-View-Controller)}
+\textbf{Problema:} Código espagueti (mezcla de HTML y Java).
+\textbf{Solución:} Jakarta EE estándar con Servlets (C) y JSPs (V).
+
+\end{document}

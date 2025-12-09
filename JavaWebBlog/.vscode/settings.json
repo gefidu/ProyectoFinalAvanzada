@@ -1,0 +1,10 @@
+{
+    "java.project.sourcePaths": [
+        "src/java",
+        "test"
+    ],
+    "java.project.outputPath": "build/classes",
+    "java.project.referencedLibraries": [
+        "web/WEB-INF/lib/*.jar"
+    ]
+}

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee 
+         https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+    
+    <display-name>Blog Management System</display-name>
+    <description>Sistema de Gestión de Contenidos (Blog) JavaWeb</description>
+    
+    <!-- Welcome File List -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+    
+    <!-- Error Pages -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/error.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>500</error-code>
+        <location>/error.jsp</location>
+    </error-page>
+    
+    <!-- Session Configuration -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+    
+    <!-- Servlets -->
+    
+    <!-- ArticuloServlet - Public article viewing -->
+    <servlet>
+        <servlet-name>ArticuloServlet</servlet-name>
+        <servlet-class>com.blog.controller.ArticuloServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ArticuloServlet</servlet-name>
+        <url-pattern>/articulos</url-pattern>
+    </servlet-mapping>
+    
+    <!-- LoginServlet - Authentication -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.blog.controller.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
+    
+    <!-- LogoutServlet - Session management -->
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.blog.controller.LogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/logout</url-pattern>
+    </servlet-mapping>
+    
+    <!-- RegisterServlet - User Registration -->
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>com.blog.controller.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/register</url-pattern>
+    </servlet-mapping>
+
+    <!-- AdminUsuariosServlet - User Management -->
+    <servlet>
+        <servlet-name>AdminUsuariosServlet</servlet-name>
+        <servlet-class>com.blog.controller.AdminUsuariosServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminUsuariosServlet</servlet-name>
+        <url-pattern>/admin/usuarios</url-pattern>
+    </servlet-mapping>
+    
+    <!-- AdminArticuloServlet - CRUD operations (protected) -->
+    <servlet>
+        <servlet-name>AdminArticuloServlet</servlet-name>
+        <servlet-class>com.blog.controller.AdminArticuloServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AdminArticuloServlet</servlet-name>
+        <url-pattern>/admin/articulos</url-pattern>
+    </servlet-mapping>
+    
+    <!-- Filters -->
+    
+    <!-- CharacterEncodingFilter - Ensure UTF-8 -->
+    <filter>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <filter-class>com.blog.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CharacterEncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    
+    <!-- AuthFilter - Protect admin routes -->
+    <filter>
+        <filter-name>AuthFilter</filter-name>
+        <filter-class>com.blog.filter.AuthFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>AuthFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+    
+</web-app>

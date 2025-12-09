@@ -1,0 +1,107 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{parskip}
+
+% Configuración para código Java
+\definecolor{javared}{rgb}{0.6,0,0} % for strings
+\definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
+\definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
+\definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+
+\lstset{language=Java,
+basicstyle=\ttfamily\small,
+keywordstyle=\color{javapurple}\bfseries,
+stringstyle=\color{javared},
+commentstyle=\color{javagreen},
+morecomment=[s][\color{javadocblue}]{/**}{*/},
+numbers=left,
+numberstyle=\tiny\color{black},
+stepnumber=1,
+numbersep=10pt,
+tabsize=4,
+showspaces=false,
+showstringspaces=false}
+
+\title{\textbf{Principios SOLID en el Proyecto} \\ \large Sistema de Gestión de Contenidos (Blog) JavaWeb}
+\author{Equipo de Desarrollo}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introducción}
+Este documento detalla cómo se han aplicado los principios SOLID en el desarrollo de la aplicación JavaWeb Blog, asegurando un código limpio, mantenible y escalable.
+
+\section{S - Single Responsibility Principle (SRP)}
+\textit{"Una clase debe tener una sola razón para cambiar."}
+
+En nuestro proyecto, separamos claramente las responsabilidades:
+
+\begin{itemize}
+    \item \textbf{Package Model:} Las clases \texttt{Articulo} y \texttt{Usuario} son simples contenedores de datos (POJOs). No tienen lógica de negocio ni acceso a datos.
+    \item \textbf{Package DAO:} Las clases como \texttt{MySQLArticuloDAO} se encargan \textbf{exclusivamente} de interactuar con la base de datos.
+    \item \textbf{Package Controller:} Los Servlets como \texttt{ArticuloServlet} se encargan \textbf{solo} de manejar la petición HTTP y decidir qué vista mostrar.
+\end{itemize}
+
+\textbf{Ejemplo en Código (MySQLArticuloDAO):}
+Esta clase solo sabe cómo ejecutar SQL. No sabe cómo se mostrarán los datos en HTML.
+
+\section{O - Open/Closed Principle (OCP)}
+\textit{"Las entidades de software deben estar abiertas para su extensión, pero cerradas para su modificación."}
+
+Hemos diseñado el sistema para que agregar soporte a una nueva base de datos no requiera modificar el código existente de los controladores.
+
+\begin{itemize}
+    \item Usamos interfaces para definir contratos.
+    \item Si queremos cambiar de MySQL a PostgreSQL, creamos una nueva clase \texttt{PostgresArticuloDAO} que implemente \texttt{IArticuloDAO}.
+    \item No necesitamos tocar ni una línea de \texttt{ArticuloServlet}, excepto la configuración de inyección.
+\end{itemize}
+
+\section{L - Liskov Substitution Principle (LSP)}
+\textit{"Las clases derivadas deben poder sustituirse por sus clases base."}
+
+Gracias al uso de la interfaz \texttt{IArticuloDAO}, el resto de la aplicación puede trabajar con cualquier implementación de esta interfaz sin saber exactamente cuál es.
+
+\begin{lstlisting}
+// En el Servlet:
+private IArticuloDAO articuloDAO;
+
+// Podemos asignar cualquier implementación 'hija'
+articuloDAO = new MySQLArticuloDAO(); // Funciona
+// articuloDAO = new OracleArticuloDAO(); // También funcionaría
+\end{lstlisting}
+
+El comportamiento del programa no se rompe al cambiar la implementación, siempre que se respete el contrato de la interfaz.
+
+\section{I - Interface Segregation Principle (ISP)}
+\textit{"Muchas interfaces cliente específicas son mejores que una interfaz de propósito general."}
+
+En lugar de tener una única "Super Interfaz" para toda la base de datos, hemos dividido las operaciones por entidad:
+
+\begin{itemize}
+    \item \textbf{IArticuloDAO:} Métodos específicos para artículos.
+    \item \textbf{IUsuarioDAO:} Métodos específicos para usuarios.
+\end{itemize}
+
+Si un cliente solo necesita gestionar usuarios, no se ve obligado a depender de métodos relacionados con artículos.
+
+\section{D - Dependency Inversion Principle (DIP)}
+\textit{"Depende de abstracciones, no de concreciones."}
+
+Nuestros módulos de alto nivel (los Servlets en el controlador) no dependen directamente de los módulos de bajo nivel (las clases DAO concretas como MySQLArticuloDAO). Ambos dependen de abstracciones (la interfaz \texttt{IArticuloDAO}).
+
+\textbf{Beneficio:}
+Esto nos permite un desacoplamiento total. Podemos probar los Servlets usando "Mock Objects" que simulen ser un DAO, sin necesidad de tener una base de datos real conectada durante las pruebas unitarias.
+
+\end{document}

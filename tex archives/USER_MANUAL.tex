@@ -1,0 +1,80 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\usepackage{hyperref}
+\usepackage{parskip}
+
+\title{\textbf{Manual de Usuario} \\ \large Sistema de Gestión de Contenidos (Blog) JavaWeb}
+\author{Equipo de Desarrollo}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Introducción}
+Este manual tiene como objetivo guiar al usuario en el uso del Sistema de Gestión de Contenidos (Blog). La aplicación permite a los usuarios leer artículos publicados y a los administradores gestionar dicho contenido.
+
+\section{Acceso a la Aplicación}
+Para acceder al sistema, abra su navegador web favorito e ingrese la siguiente dirección URL:
+\begin{center}
+    \texttt{http://localhost:8080/AdvancedFinalProject/}
+\end{center}
+
+\section{Área Pública}
+Esta sección es accesible para cualquier visitante y no requiere autenticación.
+
+\subsection{Ver Lista de Artículos}
+Al ingresar a la aplicación, verá la página principal con un listado de los artículos más recientes.
+\begin{itemize}
+    \item Cada tarjeta muestra el título, un resumen del contenido, el autor y la fecha de publicación.
+\end{itemize}
+
+\subsection{Leer un Artículo}
+Para leer el contenido completo de un artículo:
+\begin{enumerate}
+    \item Haga clic en el botón \textbf{"Leer más"} ubicado en la parte inferior de la tarjeta del artículo.
+    \item Se abrirá una nueva página con el texto completo.
+    \item Para volver, puede usar el botón \textbf{"Volver al inicio"} o el menú de navegación.
+\end{enumerate}
+
+\section{Área de Administración}
+Esta sección es exclusiva para usuarios autorizados.
+
+\subsection{Iniciar Sesión}
+1. En la barra de navegación superior, haga clic en \textbf{"Iniciar Sesión"}.
+2. Ingrese su nombre de usuario (ej. \texttt{admin}) y contraseña.
+3. Haga clic en el botón \textbf{"Ingresar"}.
+
+\subsection{Dashboard}
+Una vez autenticado, será redirigido al Dashboard, donde podrá ver estadísticas rápidas sobre el número de artículos publicados.
+
+\subsection{Gestión de Artículos}
+Desde el menú de administración, seleccione \textbf{"Artículos"} para acceder a las opciones de gestión.
+
+\subsubsection{Crear Nuevo Artículo}
+1. Haga clic en el botón verde \textbf{"Nuevo Artículo"}.
+2. Complete el formulario con el \textbf{Título} y el \textbf{Contenido}.
+3. Haga clic en \textbf{"Guardar"}.
+
+\subsubsection{Editar Artículo}
+1. En la lista de artículos, identifique el que desea modificar.
+2. Haga clic en el botón azul \textbf{"Editar"}.
+3. Modifique la información necesaria y haga clic en \textbf{"Actualizar"}.
+
+\subsubsection{Eliminar Artículo}
+1. En la lista de artículos, identifique el que desea borrar.
+2. Haga clic en el botón rojo \textbf{"Eliminar"}.
+3. Confirme la acción si el sistema lo solicita.
+
+\subsection{Cerrar Sesión}
+Para salir del sistema de forma segura, haga clic en el botón \textbf{"Cerrar Sesión"} ubicado en la esquina superior derecha de la barra de navegación.
+
+\end{document}
