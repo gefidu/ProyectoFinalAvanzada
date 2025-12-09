@@ -138,4 +138,76 @@ class AdminUsuariosServletTest {
         verify(usuarioDAO, never()).actualizarRol(anyInt(), anyString());
         verify(response).sendRedirect("/blog/admin/usuarios");
     }
+
+    @Test
+    @DisplayName("eliminar usuario debe llamar a DAO")
+    void testEliminarUsuario() throws ServletException, IOException, SQLException {
+        when(request.getSession(false)).thenReturn(session);
+        Usuario admin = new Usuario(1, "admin", "pass", "Admin Name", "admin@test.com", "Admin");
+        admin.setRol("admin");
+        when(session.getAttribute("usuario")).thenReturn(admin);
+
+        when(request.getParameter("action")).thenReturn("eliminar");
+        when(request.getParameter("id")).thenReturn("5");
+        when(request.getContextPath()).thenReturn("/blog");
+
+        servlet.doGet(request, response);
+
+        verify(usuarioDAO).eliminar(5);
+        verify(response).sendRedirect("/blog/admin/usuarios");
+    }
+
+    @Test
+    @DisplayName("eliminar usuario no debe permitir auto-eliminación")
+    void testNoSelfDelete() throws ServletException, IOException, SQLException {
+        when(request.getSession(false)).thenReturn(session);
+        Usuario admin = new Usuario(2, "admin", "pass", "Admin Name", "admin@test.com", "Admin");
+        admin.setRol("admin");
+        when(session.getAttribute("usuario")).thenReturn(admin);
+
+        when(request.getParameter("action")).thenReturn("eliminar");
+        when(request.getParameter("id")).thenReturn("2");
+        when(request.getContextPath()).thenReturn("/blog");
+
+        servlet.doGet(request, response);
+
+        verify(usuarioDAO, never()).eliminar(anyInt());
+        verify(response).sendRedirect("/blog/admin/usuarios?error=no-self-delete");
+    }
+
+    @Test
+    @DisplayName("eliminar usuario ID 1 debe estar protegido")
+    void testProtectedUserDelete() throws ServletException, IOException, SQLException {
+        when(request.getSession(false)).thenReturn(session);
+        Usuario admin = new Usuario(2, "admin", "pass", "Admin Name", "admin@test.com", "Admin");
+        admin.setRol("admin");
+        when(session.getAttribute("usuario")).thenReturn(admin);
+
+        when(request.getParameter("action")).thenReturn("eliminar");
+        when(request.getParameter("id")).thenReturn("1");
+        when(request.getContextPath()).thenReturn("/blog");
+
+        servlet.doGet(request, response);
+
+        verify(usuarioDAO, never()).eliminar(anyInt());
+        verify(response).sendRedirect("/blog/admin/usuarios?error=protected-user");
+    }
+
+    @Test
+    @DisplayName("eliminar todos excepto admins debe llamar a DAO")
+    void testEliminarTodosExceptoAdmins() throws ServletException, IOException, SQLException {
+        when(request.getSession(false)).thenReturn(session);
+        Usuario admin = new Usuario(1, "admin", "pass", "Admin Name", "admin@test.com", "Admin");
+        admin.setRol("admin");
+        when(session.getAttribute("usuario")).thenReturn(admin);
+
+        when(request.getParameter("action")).thenReturn("eliminarTodos");
+        when(request.getContextPath()).thenReturn("/blog");
+        when(usuarioDAO.eliminarTodosExceptoAdmins()).thenReturn(5);
+
+        servlet.doGet(request, response);
+
+        verify(usuarioDAO).eliminarTodosExceptoAdmins();
+        verify(response).sendRedirect("/blog/admin/usuarios?deleted=5");
+    }
 }
