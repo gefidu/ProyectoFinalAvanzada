@@ -208,4 +208,44 @@ public class MySQLUsuarioDAO implements IUsuarioDAO {
             }
         }, "actualizarRol");
     }
+
+    @Override
+    public boolean eliminar(int id) throws SQLException {
+        return executeWithRetry(() -> {
+            String sql = "DELETE FROM usuarios WHERE id = ?";
+
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setInt(1, id);
+
+                    return stmt.executeUpdate() > 0;
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "eliminar");
+    }
+
+    @Override
+    public int eliminarTodosExceptoAdmins() throws SQLException {
+        return executeWithRetry(() -> {
+            String sql = "DELETE FROM usuarios WHERE rol != 'admin'";
+
+            Connection conn = null;
+            try {
+                conn = conexionBD.getConexion();
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    return stmt.executeUpdate();
+                }
+            } finally {
+                if (conn != null) {
+                    conexionBD.cerrarConexion(conn);
+                }
+            }
+        }, "eliminarTodosExceptoAdmins");
+    }
 }

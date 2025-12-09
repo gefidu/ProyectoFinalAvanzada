@@ -6,7 +6,13 @@
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Dashboard - Administración</title>
+            <title>Dashboard - Odally</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Literata:opsz,wght@7..72,300;7..72,400;7..72,600;7..72,700&display=swap" rel="stylesheet">
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Literata:opsz,wght@7..72,300;7..72,400;7..72,600;7..72,700&display=swap" rel="stylesheet">
             <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
             <link href="<c:url value='/css/styles.css'/>" rel="stylesheet">
         </head>
@@ -15,7 +21,7 @@
             <!-- Navbar -->
             <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div class="container">
-                    <a class="navbar-brand" href="<c:url value='/articulos'/>">Mi Blog</a>
+                    <a class="navbar-brand" href="<c:url value='/articulos'/>">Odally</a>
                     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                         <span class="navbar-toggler-icon"></span>
                     </button>
@@ -114,10 +120,9 @@
                 </div>
             </div>
 
-            <!-- Footer -->
             <footer class="footer mt-5">
                 <div class="container text-center">
-                    <p class="mb-0">&copy; 2025 Blog Management System - Panel de Administración</p>
+                    <p class="mb-0">&copy; 2025 Odally - Panel de Administración</p>
                 </div>
             </footer>
 
