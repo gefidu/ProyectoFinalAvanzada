@@ -10,20 +10,53 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MySQLArticuloDAO - Implementación de IArticuloDAO para MySQL
+ * Implementación MySQL del patrón DAO para operaciones de artículos.
  * 
- * Principio SOLID aplicado: L - Liskov Substitution Principle (Sustitución de
- * Liskov).
- * Ver Sección 1.3 en PRINCIPIOS_Y_PATRONES.tex
+ * <p>Esta clase proporciona la implementación concreta de {@link IArticuloDAO} usando
+ * MySQL como sistema de gestión de base de datos. Maneja todas las operaciones CRUD
+ * (Create, Read, Update, Delete) para artículos, utilizando JDBC y PreparedStatements
+ * para prevenir inyección SQL.</p>
  * 
- * Patrón de Diseño: DAO (Data Access Object).
- * Ver Sección 3.2 en PRINCIPIOS_Y_PATRONES.tex
+ * <h3>Características de resiliencia:</h3>
+ * <ul>
+ *   <li><b>Reintentos automáticos:</b> Las operaciones se reintentan hasta 2 veces
+ *   con backoff exponencial en caso de fallo</li>
+ *   <li><b>Pool de conexiones:</b> Utiliza el pool de {@link ConexionBD} para
+ *   gestión eficiente de conexiones</li>
+ *   <li><b>LEFT JOIN:</b> Las consultas usan LEFT JOIN para mostrar artículos aunque
+ *   el autor haya sido eliminado</li>
+ * </ul>
  * 
- * Esta clase es una ciudadana ejemplar: cumple al pie de la letra el contrato
- * definido por IArticuloDAO.
- * Esto significa que cualquier parte del código que espere un IArticuloDAO
- * aceptará esta clase
- * sin rechistar, sin saber siquiera que por debajo hay una base de datos MySQL.
+ * <h3>Principios SOLID aplicados:</h3>
+ * <ul>
+ *   <li><b>S - Single Responsibility Principle (SRP):</b> Esta clase solo se encarga
+ *   de la persistencia de artículos en MySQL. Ver Sección 2.1.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>L - Liskov Substitution Principle (LSP):</b> Cumple completamente el contrato
+ *   de {@link IArticuloDAO}, puede sustituirse por cualquier otra implementación.
+ *   Ver Sección 2.1.3 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>D - Dependency Inversion Principle (DIP):</b> Los controladores dependen de
+ *   la interfaz {@link IArticuloDAO}, no de esta clase concreta. Ver Sección 2.1.5 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Patrón de diseño:</h3>
+ * <ul>
+ *   <li><b>DAO (Data Access Object):</b> Encapsula toda la lógica de acceso a datos
+ *   de artículos. Ver Sección 2.4.2 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>Singleton (indirecto):</b> Utiliza {@link ConexionBD} que implementa Singleton.
+ *   Ver Sección 2.4.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Seguridad:</h3>
+ * <p>Utiliza PreparedStatements en todas las operaciones SQL para prevenir inyección SQL.
+ * Nunca concatena directamente datos del usuario en las consultas.</p>
+ * 
+ * @author Dylan David Silva Orrego
+ * @author Maria Alejandra Munevar Barrera
+ * @version 1.0
+ * @since 2025-12-09
+ * @see com.blog.dao.IArticuloDAO
+ * @see com.blog.dao.ConexionBD
+ * @see com.blog.model.Articulo
  */
 public class MySQLArticuloDAO implements IArticuloDAO {
 

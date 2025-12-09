@@ -7,29 +7,92 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * DatabaseCheckFilter - Verifica la disponibilidad de la base de datos
- * y redirige a la página de configuración si no está disponible.
+ * Filtro de verificación de disponibilidad de base de datos.
  * 
- * Este filtro intercepta todas las peticiones excepto:
- * - La página de setup (/setup)
- * - Recursos estáticos (CSS, JS, imágenes)
+ * <p>Este filtro intercepta todas las peticiones HTTP (excepto las configuradas como excepciones)
+ * y verifica que la base de datos esté disponible antes de permitir el acceso. Si la base de
+ * datos no está disponible, redirige automáticamente a la página de configuración {@code /setup}.</p>
  * 
- * Si detecta que la base de datos no está disponible después de los
- * reintentos configurados, redirige al usuario a /setup para configurar
- * la conexión.
+ * <h3>Rutas excluidas de la verificación:</h3>
+ * <ul>
+ *   <li>{@code /setup} - Página de configuración de base de datos</li>
+ *   <li>Recursos estáticos: CSS, JavaScript, imágenes</li>
+ * </ul>
+ * 
+ * <h3>Características:</h3>
+ * <ul>
+ *   <li><b>Caché inteligente:</b> Evita verificar la BD en cada petición usando un caché
+ *   de 30 segundos</li>
+ *   <li><b>Reintentos automáticos:</b> Utiliza el mecanismo de reintentos de
+ *   {@link ConexionBD}</li>
+ *   <li><b>Redirección automática:</b> Guía al usuario a la configuración cuando es necesario</li>
+ * </ul>
+ * 
+ * <h3>Principios SOLID aplicados:</h3>
+ * <ul>
+ *   <li><b>S - Single Responsibility Principle (SRP):</b> Este filtro solo verifica
+ *   disponibilidad de BD y redirige. No maneja configuración ni autenticación.
+ *   Ver Sección 2.1.1 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>D - Dependency Inversion Principle (DIP):</b> Depende de la abstracción
+ *   {@link ConexionBD} y su método estático de verificación. Ver Sección 2.1.5 en PRINCIPIOS_Y_PATRONES.tex</li>
+ * </ul>
+ * 
+ * <h3>Otros principios de diseño:</h3>
+ * <ul>
+ *   <li><b>SoC (Separation of Concerns):</b> Separa la verificación de conectividad
+ *   de la lógica de negocio. Ver Sección 2.3.4 en PRINCIPIOS_Y_PATRONES.tex</li>
+ *   <li><b>Fail-Fast:</b> Detecta problemas de conexión temprano y redirige al usuario
+ *   antes de fallos inesperados</li>
+ * </ul>
+ * 
+ * <h3>Ejemplo de uso:</h3>
+ * <p>Si el usuario intenta acceder a {@code /articulos} pero la BD no está disponible,
+ * será redirigido automáticamente a {@code /setup} para configurar la conexión.</p>
+ * 
+ * @author Dylan David Silva Orrego
+ * @author Maria Alejandra Munevar Barrera
+ * @version 1.0
+ * @since 2025-12-09
+ * @see com.blog.dao.ConexionBD
+ * @see com.blog.controller.SetupServlet
  */
 public class DatabaseCheckFilter implements Filter {
     
+    /** Ruta de la página de setup */
     private static final String SETUP_PATH = "/setup";
-    private static Boolean databaseAvailable = null;
-    private static long lastCheck = 0;
-    private static final long CHECK_INTERVAL_MS = 30000; // 30 segundos
     
+    /** Estado cacheado de disponibilidad de la base de datos */
+    private static Boolean databaseAvailable = null;
+    
+    /** Timestamp de la última verificación */
+    private static long lastCheck = 0;
+    
+    /** Intervalo entre verificaciones (30 segundos) */
+    private static final long CHECK_INTERVAL_MS = 30000;
+    
+    /**
+     * Inicializa el filtro de verificación de base de datos.
+     * 
+     * @param filterConfig Configuración del filtro proporcionada por el contenedor
+     * @throws ServletException Si ocurre un error durante la inicialización
+     */
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
         System.out.println("[DatabaseCheckFilter] Filter inicializado");
     }
     
+    /**
+     * Ejecuta la lógica de filtrado de verificación de base de datos.
+     * 
+     * <p>Verifica si la ruta solicitada debe ser verificada. Si es así, comprueba
+     * la disponibilidad de la BD. Si no está disponible, redirige a {@code /setup}.</p>
+     * 
+     * @param request Petición HTTP del cliente
+     * @param response Respuesta HTTP al cliente
+     * @param chain Cadena de filtros para continuar el procesamiento
+     * @throws IOException Si ocurre un error de I/O
+     * @throws ServletException Si ocurre un error de servlet
+     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -58,8 +121,16 @@ public class DatabaseCheckFilter implements Filter {
     }
     
     /**
-     * Determina si se debe saltar la verificación de base de datos
-     * para la ruta especificada
+     * Determina si se debe saltar la verificación de base de datos para la ruta especificada.
+     * 
+     * <p>Las rutas que se saltan son:</p>
+     * <ul>
+     *   <li>La página de setup ({@code /setup})</li>
+     *   <li>Recursos estáticos: CSS, JS, imágenes</li>
+     * </ul>
+     * 
+     * @param path Ruta relativa de la petición
+     * @return true si se debe saltar la verificación, false en caso contrario
      */
     private boolean shouldSkipCheck(String path) {
         // Saltar verificación para la página de setup
@@ -86,8 +157,13 @@ public class DatabaseCheckFilter implements Filter {
     }
     
     /**
-     * Verifica si la base de datos está disponible
-     * Usa cache para evitar verificaciones constantes
+     * Verifica si la base de datos está disponible usando un mecanismo de caché.
+     * 
+     * <p>Para evitar verificaciones constantes que degraden el rendimiento, se cachea
+     * el resultado durante 30 segundos. Solo se realiza una nueva verificación si
+     * el caché ha expirado.</p>
+     * 
+     * @return true si la base de datos está disponible, false en caso contrario
      */
     private boolean isDatabaseAvailable() {
         long now = System.currentTimeMillis();
@@ -117,14 +193,20 @@ public class DatabaseCheckFilter implements Filter {
     }
     
     /**
-     * Invalida el cache de disponibilidad de BD
-     * Útil para forzar una nueva verificación después de cambios de configuración
+     * Invalida el caché de disponibilidad de base de datos.
+     * 
+     * <p>Este método es útil para forzar una nueva verificación después de cambios
+     * de configuración. Puede ser llamado desde {@link com.blog.controller.SetupServlet}
+     * después de guardar una nueva configuración.</p>
      */
     public static void invalidateCache() {
         databaseAvailable = null;
         lastCheck = 0;
     }
     
+    /**
+     * Destruye el filtro cuando el contenedor lo descarga.
+     */
     @Override
     public void destroy() {
         System.out.println("[DatabaseCheckFilter] Filter destruido");
