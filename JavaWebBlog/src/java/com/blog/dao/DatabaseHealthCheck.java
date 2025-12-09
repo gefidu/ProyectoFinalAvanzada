@@ -154,8 +154,7 @@ public class DatabaseHealthCheck {
      */
     public HealthCheckResult checkRequiredTables() {
         String[] requiredTables = {"usuarios", "articulos"};
-        HealthCheckResult result = new HealthCheckResult(true, 
-            "Todas las tablas necesarias están presentes.");
+        List<String> missingTables = new ArrayList<>();
 
         try (Connection conn = conexionBD.getConexion()) {
             if (conn == null || conn.isClosed()) {
@@ -167,17 +166,21 @@ public class DatabaseHealthCheck {
             
             for (String tableName : requiredTables) {
                 if (!tableExists(metaData, tableName)) {
-                    result.addIssue("La tabla '" + tableName + "' no existe");
+                    missingTables.add(tableName);
                 }
             }
 
-            if (!result.getIssues().isEmpty()) {
-                return new HealthCheckResult(false, 
-                    "Faltan tablas en la base de datos. Debe ejecutar el script schema.sql.\n" +
-                    "Tablas faltantes: " + result.getIssues());
+            if (!missingTables.isEmpty()) {
+                HealthCheckResult result = new HealthCheckResult(false, 
+                    "Faltan tablas en la base de datos. Debe ejecutar el script schema.sql.");
+                for (String tableName : missingTables) {
+                    result.addIssue("La tabla '" + tableName + "' no existe");
+                }
+                return result;
             }
 
-            return result;
+            return new HealthCheckResult(true, 
+                "Todas las tablas necesarias están presentes.");
 
         } catch (SQLException e) {
             HealthCheckResult errorResult = new HealthCheckResult(false, 

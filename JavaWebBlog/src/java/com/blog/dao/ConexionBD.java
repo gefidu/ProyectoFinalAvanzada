@@ -9,7 +9,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -111,7 +110,7 @@ public class ConexionBD {
             System.out.println("[ConexionBD] Driver MySQL cargado.");
 
             // Inicializar el pool de conexiones
-            connectionPool = new CopyOnWriteArrayList<>();
+            connectionPool = new ArrayList<>();
             initializePool();
 
             System.out.println("[ConexionBD] Sistema de conexión inicializado correctamente.");
@@ -162,14 +161,16 @@ public class ConexionBD {
      */
     private void initializePool() {
         System.out.println("[ConexionBD] Inicializando pool con " + minConnections + " conexiones...");
-        for (int i = 0; i < minConnections; i++) {
-            try {
-                Connection conn = createNewConnection();
-                connectionPool.add(new PooledConnection(conn));
-            } catch (SQLException e) {
-                System.err.println("[ConexionBD] Advertencia: No se pudo crear conexión inicial #" + (i + 1) 
-                    + ": " + e.getMessage());
-                // No lanzar excepción, el pool puede funcionar con menos conexiones
+        synchronized (connectionPool) {
+            for (int i = 0; i < minConnections; i++) {
+                try {
+                    Connection conn = createNewConnection();
+                    connectionPool.add(new PooledConnection(conn));
+                } catch (SQLException e) {
+                    System.err.println("[ConexionBD] Advertencia: No se pudo crear conexión inicial #" + (i + 1) 
+                        + ": " + e.getMessage());
+                    // No lanzar excepción, el pool puede funcionar con menos conexiones
+                }
             }
         }
         System.out.println("[ConexionBD] Pool inicializado con " + connectionPool.size() + " conexiones.");
@@ -249,12 +250,17 @@ public class ConexionBD {
                 
                 // Verificar si el pool no está lleno
                 if (connectionPool.size() < maxConnections) {
-                    Connection newConn = createNewConnection();
-                    PooledConnection pooledConn = new PooledConnection(newConn);
-                    pooledConn.setInUse(true);
-                    connectionPool.add(pooledConn);
-                    System.out.println("[ConexionBD] Nueva conexión creada. Pool size: " + connectionPool.size());
-                    return newConn;
+                    try {
+                        Connection newConn = createNewConnection();
+                        PooledConnection pooledConn = new PooledConnection(newConn);
+                        pooledConn.setInUse(true);
+                        connectionPool.add(pooledConn);
+                        System.out.println("[ConexionBD] Nueva conexión creada. Pool size: " + connectionPool.size());
+                        return newConn;
+                    } catch (SQLException sqlEx) {
+                        // La creación de conexión falló, lanzar para que el retry logic lo maneje
+                        throw sqlEx;
+                    }
                 }
             }
             
@@ -405,14 +411,16 @@ public class ConexionBD {
      */
     public void shutdown() {
         System.out.println("[ConexionBD] Cerrando todas las conexiones del pool...");
-        for (PooledConnection pooledConn : connectionPool) {
-            try {
-                pooledConn.connection.close();
-            } catch (SQLException e) {
-                System.err.println("[ConexionBD] Error al cerrar conexión durante shutdown: " + e.getMessage());
+        synchronized (connectionPool) {
+            for (PooledConnection pooledConn : connectionPool) {
+                try {
+                    pooledConn.connection.close();
+                } catch (SQLException e) {
+                    System.err.println("[ConexionBD] Error al cerrar conexión durante shutdown: " + e.getMessage());
+                }
             }
+            connectionPool.clear();
         }
-        connectionPool.clear();
         System.out.println("[ConexionBD] Pool cerrado.");
     }
 
@@ -422,15 +430,17 @@ public class ConexionBD {
      * @return String con estadísticas
      */
     public String getPoolStats() {
-        int total = connectionPool.size();
-        int inUse = 0;
-        for (PooledConnection pooledConn : connectionPool) {
-            if (pooledConn.isInUse()) {
-                inUse++;
+        synchronized (connectionPool) {
+            int total = connectionPool.size();
+            int inUse = 0;
+            for (PooledConnection pooledConn : connectionPool) {
+                if (pooledConn.isInUse()) {
+                    inUse++;
+                }
             }
+            return String.format("Pool Stats - Total: %d, En uso: %d, Disponibles: %d, Máximo: %d",
+                    total, inUse, total - inUse, maxConnections);
         }
-        return String.format("Pool Stats - Total: %d, En uso: %d, Disponibles: %d, Máximo: %d",
-                total, inUse, total - inUse, maxConnections);
     }
 }
 
