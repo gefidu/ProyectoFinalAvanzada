@@ -8,17 +8,13 @@
 \geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
 \usepackage{hyperref}
 \usepackage{parskip}
-\usepackage{amsmath} % Paquete matemático
-\usepackage{listings} % Para bloques de código
-\usepackage{xcolor} % Para colores en el código
-\usepackage{caption} % Para personalizar captiones
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage{csquotes}
 
-\usepackage{fontspec}
-\setmainfont{Source Sans Pro}
-\setsansfont{Source Sans Pro}
-\setmonofont{Source Code Pro}[Scale=MatchLowercase]
-
-% Configuración de colores para listings (igual a tu configuración original)
+% Configuración de colores para listings
 \definecolor{codebg}{rgb}{0.95,0.95,0.95}
 \definecolor{codeframe}{rgb}{0.82,0.82,0.82}
 \definecolor{keyword}{rgb}{0.0,0.2,0.65}
@@ -49,185 +45,1191 @@
   xrightmargin=0pt
 }
 
-\lstset{style=mystyle, language=Python}
-
+\lstset{style=mystyle, language=Java}
 
 \begin{document}
 
-% Portada con logo (comenta la siguiente línea si no tienes la imagen)
 \begin{titlepage}
     \centering
-    % Si tienes la imagen UDLogo.png, descomenta la línea siguiente
-    \includegraphics[width=6cm]{figures/UDLogo.png}\\[1cm]
+    \vspace*{1cm}
     
     {\LARGE Universidad Distrital Francisco José de Caldas\par}
     {\large Facultad de Ingeniería\par}
     {\large Ingeniería de Sistemas\par}
     \vspace{2cm}
     
-    {\huge\bfseries Principios de Ingeniería y Patrones de Diseño\par}
-    {\huge\bfseries Blog \textit{Odally}\par}
+    {\huge\bfseries Principios de Ingeniería de Software\par}
+    {\huge\bfseries y Patrones de Diseño\par}
+    \vspace{0.5cm}
+    {\LARGE Proyecto: Odally | Blog\par}
     \vspace{1.5cm}
     
     {\large
-    \begin{tabular}{l}
-    Alejandra Munevar -- 2024 \\
-    Dylan Silva -- 2024 \\
-    Moreno Granado Sergio Leonardo -- 20242020091
+    \begin{tabular}{ll}
+    \textbf{Estudiantes:} & Dylan David Silva Orrego -- 20242020130 \\
+                          & Maria Alejandra Munevar Barrera -- 20242020145
     \end{tabular}\par}
     \vspace{1.5cm}
     
-    {\large \emph{Docente:} Lilia Marcela Espinosa Rodríguez\par}
+    {\large \textbf{Profesora:} Lilia Marcela Espinosa Rodríguez\par}
     \vspace{2cm}
     
-    {\large Proyecto Final de Programación Avanzada\par}
+    {\large Programación Avanzada\par}
     {\large Semestre 2025-3\par}
     \vfill
     
     {\large Diciembre de 2025, Bogotá D.C.\par}
 \end{titlepage}
 
-\maketitle
 \tableofcontents
 \newpage
 
 \section{Introducción}
-Este documento es la referencia técnica definitiva sobre las decisiones 
-de diseño tomadas en el proyecto. No solo nos adherimos a los principios 
-SOLID, sino que aplicamos un espectro más amplio de buenas prácticas 
-de ingeniería de software (DRY, KISS, SoC) y patrones de diseño 
-clásicos.
 
+Este documento presenta una exploración exhaustiva de los principios de ingeniería de software y patrones de diseño aplicados en el proyecto \textbf{Odally | Blog}, un sistema de gestión de contenidos desarrollado con tecnologías JavaWeb (Servlets/JSP). 
+
+El proyecto no solo implementa los conocidos principios SOLID, sino que también aplica un espectro más amplio de buenas prácticas de ingeniería de software, incluyendo principios de arquitectura de paquetes, principios de diseño general y patrones de diseño clásicos de la industria.
+
+\subsection{Objetivos del Documento}
+
+\begin{itemize}
+    \item Documentar la aplicación práctica de principios SOLID en código real
+    \item Explicar los principios de arquitectura de paquetes en el contexto del proyecto
+    \item Demostrar la implementación de principios de diseño como DRY, KISS, YAGNI, SoC y LoD
+    \item Describir los patrones de diseño implementados y su justificación
+    \item Proporcionar referencias cruzadas entre teoría y código fuente
+\end{itemize}
+
+\subsection{Arquitectura del Sistema}
+
+El sistema Odally | Blog sigue una arquitectura MVC (Model-View-Controller) implementada con:
+
+\begin{itemize}
+    \item \textbf{Modelo:} POJOs (Plain Old Java Objects) para entidades del dominio
+    \item \textbf{Vista:} JSPs con JSTL para presentación
+    \item \textbf{Controlador:} Servlets de Jakarta EE
+    \item \textbf{Persistencia:} Patrón DAO con MySQL
+\end{itemize}
+
+\newpage
 \section{Principios SOLID}
-\subsection{S - Single Responsibility Principle (SRP)}
-\emph{``Una clase debe tener una sola razón para cambiar.''}
 
-\textbf{Aplicación:}
-Separamos la persistencia (DAO), la lógica de control (Servlet) y los 
-datos (Modelo).
+SOLID es un acrónimo que representa cinco principios fundamentales de diseño orientado a objetos, introducidos por Robert C. Martin \cite{martin2000design}. Estos principios buscan hacer el software más comprensible, flexible y mantenible.
 
-\textbf{Referencia en Código:}
-Ver \texttt{com.blog.dao.ConexionBD}.
-\begin{lstlisting}
-// ConexionBD.java
-// RESPONSABILIDAD: Únicamente gestionar conexiones JDBC.
-// No valida usuarios, no formatea fechas, solo conecta.
+\subsection{S - Single Responsibility Principle (Principio de Responsabilidad Única)}
+
+\subsubsection{Definición}
+
+``Una clase debe tener una, y solo una, razón para cambiar'' \cite{martin2003agile}.
+
+Este principio establece que cada clase debe tener una única responsabilidad bien definida. Si una clase tiene múltiples responsabilidades, los cambios en una pueden afectar a las otras, creando acoplamiento y fragilidad.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Clase \texttt{ConexionBD}}
+
+La clase \texttt{ConexionBD} tiene \textbf{una única responsabilidad}: gestionar el pool de conexiones a la base de datos.
+
+\begin{lstlisting}[caption=ConexionBD.java - Responsabilidad Única]
+/**
+ * Clase Singleton para gestionar el pool de conexiones
+ * RESPONSABILIDAD: Únicamente proporcionar conexiones JDBC.
+ * No valida usuarios, no formatea fechas, solo conecta.
+ */
 public class ConexionBD {
-    // ... lógica de conexión ...
+    private static volatile ConexionBD instancia;
+    private final List<PooledConnection> connectionPool;
+    
+    public Connection getConexion() throws SQLException {
+        // Lógica de pool y reintentos
+    }
+    
+    public void cerrarConexion(Connection conn) {
+        // Devolver conexión al pool
+    }
 }
 \end{lstlisting}
 
-\subsection{O - Open/Closed Principle (OCP)}
-\emph{``Abierto a extensión, cerrado a modificación.''}
+\textbf{¿Por qué cumple SRP?}
+\begin{itemize}
+    \item Solo maneja conexiones a base de datos
+    \item No contiene lógica de negocio
+    \item No valida datos de usuarios
+    \item No ejecuta consultas SQL
+    \item Cambiaría solo si cambia la estrategia de conexión
+\end{itemize}
 
-\textbf{Aplicación:}
-El sistema soporta nuevos motores de base de datos sin tocar los 
-controladores existentes.
+\paragraph{Clase \texttt{PasswordUtil}}
 
-\textbf{Referencia en Código:}
-Ver \texttt{com.blog.controller.ArticuloServlet}.
-\begin{lstlisting}
-// ArticuloServlet.java
-// El servlet depende de la abstracción, no de la implementación.
-private IArticuloDAO articuloDAO; 
-// Si mañana usamos Oracle, cambiamos la inyección aquí, 
-// y el resto del código del Servlet permanece intacto.
+Esta clase utilitaria tiene como \textbf{única responsabilidad}: hashear y verificar contraseñas.
+
+\begin{lstlisting}[caption=PasswordUtil.java - Una Sola Responsabilidad]
+public class PasswordUtil {
+    /**
+     * RESPONSABILIDAD ÚNICA: Hashear contraseñas con SHA-256
+     */
+    public static String hashPassword(String password) {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        // ... lógica de hasheo
+        return hexString.toString();
+    }
+    
+    public static boolean verificarPassword(String password, 
+                                           String hashedPassword) {
+        return hashPassword(password).equals(hashedPassword);
+    }
+}
 \end{lstlisting}
 
-\subsection{L - Liskov Substitution Principle (LSP)}
-\emph{``Las subclases deben ser sustituibles por sus clases base.''}
+\paragraph{Clases Modelo (POJOs)}
 
-\textbf{Aplicación:}
-Cualquier implementación de \texttt{IArticuloDAO} funciona en el sistema.
+Las clases \texttt{Usuario} y \texttt{Articulo} son contenedores de datos puros:
 
-\textbf{Referencia en Código:}
-Ver \texttt{com.blog.dao.MySQLArticuloDAO}.
-\begin{lstlisting}
-// MySQLArticuloDAO.java
-// Cumple estrictamente el contrato (interfaz) IArticuloDAO.
-// No lanza excepciones inesperadas ni cambia el comportamiento esperado.
-public class MySQLArticuloDAO implements IArticuloDAO { ... }
+\begin{lstlisting}[caption=Articulo.java - POJO Simple]
+/**
+ * POJO que solo contiene datos de un artículo.
+ * No sabe cómo guardarse, no valida, solo almacena.
+ */
+public class Articulo implements Serializable {
+    private int id;
+    private String titulo;
+    private String contenido;
+    private LocalDateTime fechaPublicacion;
+    
+    // Getters y Setters únicamente
+}
 \end{lstlisting}
 
-\subsection{I - Interface Segregation Principle (ISP)}
-\emph{``Interfaces específicas para clientes específicos.''}
+\subsection{O - Open/Closed Principle (Principio Abierto/Cerrado)}
 
-\textbf{Aplicación:}
-Interfaces granulares (\texttt{IArticuloDAO}, \texttt{IUsuarioDAO}) en lugar 
-de un ``God DAO''.
+\subsubsection{Definición}
 
-\subsection{D - Dependency Inversion Principle (DIP)}
-\emph{``Depender de abstracciones, no de concreciones.''}
+``Las entidades de software deben estar abiertas para extensión, pero cerradas para modificación'' \cite{martin2000design}.
 
-\textbf{Aplicación:}
-Los módulos de alto nivel (Controller) no importan las clases de bajo 
-nivel (MySQL Implementation).
+Este principio sugiere que debemos poder agregar nueva funcionalidad sin modificar el código existente, típicamente mediante el uso de interfaces y polimorfismo.
 
-\section{Otros Principios de Ingeniería}
+\subsubsection{Aplicación en el Proyecto}
 
-\subsection{DRY (Don't Repeat Yourself)}
-\emph{``Cada pieza de conocimiento debe tener una representación 
-única, inequívoca y autorizada dentro de un sistema.''}
+\paragraph{Interfaces DAO}
+
+El sistema define interfaces \texttt{IArticuloDAO} e \texttt{IUsuarioDAO} que están cerradas a modificación pero abiertas a extensión:
+
+\begin{lstlisting}[caption=IArticuloDAO.java - Abierto/Cerrado]
+/**
+ * Interfaz cerrada a modificación.
+ * Podemos extenderla con nuevas implementaciones
+ * sin tocar el código existente.
+ */
+public interface IArticuloDAO {
+    List<Articulo> listarTodos() throws SQLException;
+    Articulo obtenerPorId(int id) throws SQLException;
+    boolean crear(Articulo articulo) throws SQLException;
+    // ... más métodos
+}
+\end{lstlisting}
+
+\textbf{Extensión sin modificación:}
+
+\begin{lstlisting}[caption=Múltiples implementaciones]
+// Implementación actual para MySQL
+public class MySQLArticuloDAO implements IArticuloDAO {
+    // Implementación con MySQL
+}
+
+// Podríamos agregar PostgreSQL sin modificar código existente
+public class PostgreSQLArticuloDAO implements IArticuloDAO {
+    // Nueva implementación con PostgreSQL
+}
+
+// O incluso MongoDB
+public class MongoArticuloDAO implements IArticuloDAO {
+    // Implementación NoSQL
+}
+\end{lstlisting}
+
+\paragraph{Uso en Controladores}
+
+Los servlets dependen de la interfaz, no de la implementación concreta:
+
+\begin{lstlisting}[caption=ArticuloServlet.java]
+public class ArticuloServlet extends HttpServlet {
+    // Depende de la interfaz, no de MySQL específicamente
+    private IArticuloDAO articuloDAO;
+    
+    @Override
+    public void init() {
+        // Podemos inyectar cualquier implementación
+        this.articuloDAO = new MySQLArticuloDAO();
+        // Mañana: this.articuloDAO = new PostgreSQLArticuloDAO();
+    }
+}
+\end{lstlisting}
+
+\textbf{Beneficio:} Si necesitamos cambiar de MySQL a PostgreSQL o Oracle, solo modificamos la línea de inyección. El resto del servlet permanece intacto.
+
+\subsection{L - Liskov Substitution Principle (Principio de Sustitución de Liskov)}
+
+\subsubsection{Definición}
+
+``Los objetos de una clase derivada deben poder reemplazar objetos de la clase base sin alterar el correcto funcionamiento del programa'' \cite{liskov1994behavioral}.
+
+En términos simples: si una clase B extiende o implementa una clase/interfaz A, entonces B debe poder usarse en cualquier lugar donde se espera A sin romper la funcionalidad.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Implementaciones DAO Intercambiables}
+
+Todas las implementaciones de \texttt{IArticuloDAO} son intercambiables:
+
+\begin{lstlisting}[caption=LSP en acción]
+public class MySQLArticuloDAO implements IArticuloDAO {
+    /**
+     * Cumple estrictamente el contrato de IArticuloDAO.
+     * - listarTodos() devuelve List<Articulo>, nunca null
+     * - obtenerPorId() devuelve Articulo o null
+     * - crear() devuelve boolean indicando éxito
+     * - No lanza excepciones no declaradas
+     */
+    @Override
+    public List<Articulo> listarTodos() throws SQLException {
+        // Siempre devuelve List, nunca null
+        return new ArrayList<>();
+    }
+}
+\end{lstlisting}
+
+\textbf{Garantías del contrato:}
+\begin{itemize}
+    \item Métodos de lectura no modifican estado
+    \item Excepciones declaradas en la interfaz
+    \item Tipos de retorno consistentes
+    \item Precondiciones no más estrictas
+    \item Postcondiciones no más débiles
+\end{itemize}
+
+\subsection{I - Interface Segregation Principle (Principio de Segregación de Interfaces)}
+
+\subsubsection{Definición}
+
+``Los clientes no deberían verse forzados a depender de interfaces que no usan'' \cite{martin2000design}.
+
+Es mejor tener varias interfaces específicas que una interfaz general muy grande (``God Interface'').
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Interfaces Específicas por Entidad}
+
+En lugar de tener un \texttt{IDAO} genérico gigante, tenemos interfaces específicas:
+
+\begin{lstlisting}[caption=Interfaces segregadas]
+// Interfaz específica para artículos
+public interface IArticuloDAO {
+    List<Articulo> listarTodos() throws SQLException;
+    Articulo obtenerPorId(int id) throws SQLException;
+    boolean crear(Articulo articulo) throws SQLException;
+    boolean actualizar(Articulo articulo) throws SQLException;
+    boolean eliminar(int id) throws SQLException;
+    int contarTotal() throws SQLException;
+}
+
+// Interfaz específica para usuarios (separada)
+public interface IUsuarioDAO {
+    Usuario buscarPorUsername(String username) throws SQLException;
+    Usuario obtenerPorId(int id) throws SQLException;
+    boolean crear(Usuario usuario) throws SQLException;
+    List<Usuario> listarTodos() throws SQLException;
+    boolean actualizarRol(int id, String nuevoRol) throws SQLException;
+    // ... métodos específicos de usuarios
+}
+\end{lstlisting}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item \texttt{MySQLArticuloDAO} solo implementa métodos de artículos
+    \item \texttt{MySQLUsuarioDAO} solo implementa métodos de usuarios
+    \item No hay métodos ``dummy'' o sin implementar
+    \item Interfaces cohesivas y fáciles de entender
+\end{itemize}
+
+\subsection{D - Dependency Inversion Principle (Principio de Inversión de Dependencias)}
+
+\subsubsection{Definición}
+
+``Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender de abstracciones. Las abstracciones no deben depender de detalles. Los detalles deben depender de abstracciones'' \cite{martin2000design}.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Arquitectura por Capas}
+
+El proyecto invierte las dependencias entre capas:
+
+\begin{lstlisting}[caption=Inversión de Dependencias]
+// MÓDULO DE ALTO NIVEL (Controlador)
+public class ArticuloServlet extends HttpServlet {
+    // Depende de la abstracción (interfaz), no de MySQL
+    private IArticuloDAO articuloDAO; // <<< ABSTRACCIÓN
+    
+    @Override
+    public void init() {
+        // La implementación concreta se inyecta
+        this.articuloDAO = new MySQLArticuloDAO();
+    }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, 
+                        HttpServletResponse response) {
+        // Trabaja con la abstracción
+        List<Articulo> articulos = articuloDAO.listarTodos();
+    }
+}
+
+// MÓDULO DE BAJO NIVEL (Implementación)
+public class MySQLArticuloDAO implements IArticuloDAO {
+    // Implementa la abstracción definida por el módulo de alto nivel
+}
+\end{lstlisting}
+
+\textbf{Flujo de dependencias:}
+\begin{verbatim}
+    [ArticuloServlet]  ---depende--->  [IArticuloDAO]
+                                             ^
+                                             |
+                                         implementa
+                                             |
+                                    [MySQLArticuloDAO]
+\end{verbatim}
+
+\textbf{Beneficios:}
+\begin{itemize}
+    \item El controlador no conoce MySQL
+    \item Podemos testear con mocks
+    \item Podemos cambiar de BD sin tocar controladores
+    \item Reducción del acoplamiento
+\end{itemize}
+
+\newpage
+\section{Principios de Arquitectura de Paquetes}
+
+Robert C. Martin \cite{martin2017clean} definió seis principios para organizar paquetes (packages) en sistemas orientados a objetos. Se dividen en dos grupos: principios de cohesión y principios de acoplamiento.
+
+\subsection{Principios de Cohesión de Paquetes}
+
+Estos principios ayudan a decidir qué clases deben ir juntas en un paquete.
+
+\subsubsection{REP - Reuse/Release Equivalence Principle}
+
+\textbf{Definición:} ``El granularado de reutilización es el granularado de liberación'' \cite{martin2017clean}.
+
+\textbf{Aplicación:} El paquete \texttt{com.blog.dao} es una unidad cohesiva de reutilización:
+
+\begin{lstlisting}
+com.blog.dao/
+    ├── ConexionBD.java         # Singleton de conexión
+    ├── IArticuloDAO.java       # Interfaz
+    ├── MySQLArticuloDAO.java   # Implementación
+    ├── IUsuarioDAO.java
+    └── MySQLUsuarioDAO.java
+\end{lstlisting}
+
+Todo el paquete se puede reutilizar como unidad en otro proyecto que necesite acceso a datos de un blog.
+
+\subsubsection{CCP - Common Closure Principle}
+
+\textbf{Definición:} ``Las clases que cambian juntas, deben empaquetarse juntas'' \cite{martin2017clean}.
+
+\textbf{Aplicación:} 
+
+\begin{itemize}
+    \item Paquete \texttt{com.blog.model}: Las clases \texttt{Usuario} y \texttt{Articulo} cambian cuando cambia el modelo de dominio
+    \item Paquete \texttt{com.blog.filter}: Los filtros \texttt{AuthFilter}, \texttt{CharacterEncodingFilter} y \texttt{DatabaseCheckFilter} cambian cuando cambian los requisitos de seguridad o conectividad
+\end{itemize}
+
+\subsubsection{CRP - Common Reuse Principle}
+
+\textbf{Definición:} ``Las clases que se usan juntas, deben empaquetarse juntas''.
+
+\textbf{Aplicación:} Si usas \texttt{IArticuloDAO}, probablemente uses \texttt{ConexionBD}. Ambas están en \texttt{com.blog.dao}.
+
+\subsection{Principios de Acoplamiento de Paquetes}
+
+Estos principios guían las dependencias entre paquetes.
+
+\subsubsection{ADP - Acyclic Dependencies Principle}
+
+\textbf{Definición:} ``El grafo de dependencias de paquetes no debe contener ciclos'' \cite{martin2017clean}.
+
+\textbf{Aplicación en el Proyecto:}
+
+\begin{verbatim}
+com.blog.controller  ------>  com.blog.dao
+        |                          |
+        |                          v
+        v                    com.blog.model
+   com.blog.filter
+\end{verbatim}
+
+No hay ciclos: controller usa dao, dao usa model, pero model no depende de nada.
+
+\subsubsection{SDP - Stable Dependencies Principle}
+
+\textbf{Definición:} ``Depende en la dirección de estabilidad''.
 
 \textbf{Aplicación:}
 \begin{itemize}
-    \item \textbf{JSTL en Vistas:} Utilizamos JSTL (\texttt{c:forEach}, 
-    \texttt{c:url}) para evitar repetir lógica Java (Scriptlets) en 
-    múltiples fragmentos de JSP.
-    \item \textbf{Singleton de Conexión:} La lógica de leer 
-    \texttt{db.properties} y conectar está centralizada en un solo lugar, 
-    no copiada en cada DAO.
+    \item \texttt{com.blog.model} es el paquete más estable (casi nunca cambia)
+    \item \texttt{com.blog.dao} es estable (cambia poco)
+    \item \texttt{com.blog.controller} es menos estable (cambia con requisitos de UI)
 \end{itemize}
 
-\subsection{KISS (Keep It Simple, Stupid)}
-\emph{``La mayoría de los sistemas funcionan mejor si se mantienen 
-simples.''}
+Las dependencias fluyen de menos estable a más estable.
 
-\textbf{Aplicación:}
-Mantenemos los POJOs (\texttt{Articulo.java}) libres de lógica compleja. 
-Son estructuras de datos puras.
-\begin{lstlisting}
-// Articulo.java
-// Simpleza absoluta: Campos privados, Getters y Setters.
-// Nada de lógica de negocio oscura.
-public class Articulo implements Serializable { ... }
+\subsubsection{SAP - Stable Abstractions Principle}
+
+\textbf{Definición:} ``Los paquetes estables deben ser abstractos''.
+
+\textbf{Aplicación:} El paquete \texttt{com.blog.dao} es estable y contiene abstracciones (interfaces \texttt{IArticuloDAO}, \texttt{IUsuarioDAO}).
+
+\newpage
+\section{Otros Principios de Diseño}
+
+\subsection{DRY - Don't Repeat Yourself (No te Repitas)}
+
+\subsubsection{Definición}
+
+``Cada pieza de conocimiento debe tener una representación única, inequívoca y autorizada dentro del sistema'' \cite{hunt2019pragmatic}.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Singleton de Conexión}
+
+La lógica de carga de \texttt{db.properties} y creación de conexiones está centralizada en \texttt{ConexionBD}:
+
+\begin{lstlisting}[caption=Evitando duplicación con Singleton]
+// MALO (DRY violado): Cada DAO carga db.properties
+public class MySQLArticuloDAO {
+    private void conectar() {
+        Properties props = new Properties();
+        props.load(new FileInputStream("db.properties"));
+        // ... crear conexión
+    }
+}
+
+// BUENO (DRY respetado): Un solo punto de carga
+public class ConexionBD {
+    private void loadProperties() {
+        // Se carga UNA sola vez
+    }
+}
 \end{lstlisting}
 
-\subsection{SoC (Separation of Concerns)}
-\emph{``Separación de preocupaciones.''}
+\paragraph{Uso de JSTL en Vistas}
 
-\textbf{Aplicación:}
-La arquitectura MVC es la encarnación de este principio.
+En lugar de repetir scriptlets Java en cada JSP:
+
+\begin{lstlisting}[language=HTML, caption=Sin DRY vs Con DRY]
+<!-- MALO: Repetir lógica en cada JSP -->
+<% for(Articulo a : articulos) { %>
+    <h3><%= a.getTitulo() %></h3>
+<% } %>
+
+<!-- BUENO: JSTL (No Repetición) -->
+<c:forEach var="articulo" items="${articulos}">
+    <h3>${articulo.titulo}</h3>
+</c:forEach>
+\end{lstlisting}
+
+\subsection{KISS - Keep It Simple, Stupid (Mantenlo Simple)}
+
+\subsubsection{Definición}
+
+``La mayoría de los sistemas funcionan mejor si se mantienen simples en lugar de complicados'' \cite{raymond2003art}.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{POJOs Simples}
+
+Las clases modelo son extremadamente simples:
+
+\begin{lstlisting}[caption=Simplicidad en POJOs]
+public class Articulo implements Serializable {
+    // Solo campos, getters y setters
+    private int id;
+    private String titulo;
+    private String contenido;
+    
+    // Nada de lógica compleja
+    // Nada de validaciones complicadas
+    // Nada de dependencias externas
+}
+\end{lstlisting}
+
+\paragraph{PasswordUtil}
+
+Implementación simple usando SHA-256 de la biblioteca estándar:
+
+\begin{lstlisting}[caption=Implementación simple de hasheo]
+public static String hashPassword(String password) {
+    MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    byte[] hash = digest.digest(password.getBytes(UTF_8));
+    // Convertir a hex (simple y directo)
+    return toHexString(hash);
+}
+\end{lstlisting}
+
+No se usa ninguna biblioteca de terceros innecesaria.
+
+\subsection{YAGNI - You Aren't Gonna Need It (No lo vas a Necesitar)}
+
+\subsubsection{Definición}
+
+``No agregues funcionalidad hasta que sea realmente necesaria'' \cite{beck2000extreme}.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Pool de Conexiones Manual}
+
+En lugar de implementar un pool complejo con todas las campanas y silbatos, se implementó solo lo necesario:
+
+\begin{lstlisting}[caption=Solo lo necesario]
+public class ConexionBD {
+    // Implementamos:
+    // - Pool básico con min/max conexiones
+    // - Validación simple
+    // - Reintentos con backoff
+    
+    // NO implementamos (YAGNI):
+    // - Monitoreo JMX
+    // - Métricas avanzadas
+    // - Configuración dinámica en caliente
+    // - Múltiples pools para diferentes BDs
+}
+\end{lstlisting}
+
+\subsection{SoC - Separation of Concerns (Separación de Responsabilidades)}
+
+\subsubsection{Definición}
+
+``Un programa debe separarse en secciones distintas, de modo que cada sección aborde una preocupación separada'' \cite{dijkstra1982role}.
+
+\subsubsection{Aplicación en el Proyecto}
+
+\paragraph{Arquitectura MVC}
+
+La separación de responsabilidades es evidente:
+
+\begin{lstlisting}[caption=Separación en MVC]
+// VISTA (JSP): Solo presentación
+<h1>Lista de Artículos</h1>
+<c:forEach var="articulo" items="${articulos}">
+    <h2>${articulo.titulo}</h2>
+</c:forEach>
+
+// CONTROLADOR (Servlet): Solo orquestación
+public class ArticuloServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, 
+                        HttpServletResponse response) {
+        List<Articulo> articulos = articuloDAO.listarTodos();
+        request.setAttribute("articulos", articulos);
+        request.getRequestDispatcher("/index.jsp").forward(...);
+    }
+}
+
+// MODELO (DAO): Solo acceso a datos
+public class MySQLArticuloDAO implements IArticuloDAO {
+    public List<Articulo> listarTodos() {
+        // SQL puro, sin lógica de presentación
+    }
+}
+\end{lstlisting}
+
+\subsection{LoD - Law of Demeter (Ley de Deméter)}
+
+\subsubsection{Definición}
+
+``No hables con extraños'' -- Un método de un objeto solo debe llamar métodos de:
 \begin{itemize}
-    \item \textbf{Vista (JSP):} Solo presentación.
-    \item \textbf{Controlador (Servlet):} Solo orquestación.
-    \item \textbf{Modelo (DAO + Entidades):} Solo datos y negocio.
+    \item El objeto mismo
+    \item Objetos pasados como parámetros
+    \item Objetos creados dentro del método
+    \item Objetos que son atributos del objeto
 \end{itemize}
 
-\section{Patrones de Diseño Aplicados}
+\subsubsection{Aplicación en el Proyecto}
+
+\begin{lstlisting}[caption=Respetando la Ley de Deméter]
+// MALO (violación LoD - cadena de llamadas)
+String autorEmail = articulo.getAutor().getEmail();
+
+// BUENO (respeta LoD)
+public class Articulo {
+    private Usuario autor;
+    
+    // Método de conveniencia que oculta la estructura interna
+    public String getAutorEmail() {
+        return autor != null ? autor.getEmail() : null;
+    }
+}
+
+// En el código cliente
+String autorEmail = articulo.getAutorEmail();
+\end{lstlisting}
+
+\newpage
+\section{Patrones de Diseño Implementados}
 
 \subsection{Singleton Pattern}
-\textbf{Problema:} Necesitamos coordinar el acceso a un recurso compartido (BD).
-\textbf{Solución:} \texttt{ConexionBD} garantiza una única instancia 
-global.
 
-\begin{lstlisting}
-// ConexionBD.java
-public static ConexionBD getInstancia() {
-    if (instancia == null) {
-        instancia = new ConexionBD();
+\subsubsection{Definición}
+
+El patrón Singleton garantiza que una clase tenga una única instancia y proporciona un punto de acceso global a ella \cite{gamma1995design}.
+
+\subsubsection{Implementación en ConexionBD}
+
+\begin{lstlisting}[caption=Singleton Thread-Safe con Double-Checked Locking]
+public class ConexionBD {
+    // volatile garantiza visibilidad entre threads
+    private static volatile ConexionBD instancia;
+    
+    // Constructor privado - nadie puede hacer new ConexionBD()
+    private ConexionBD() {
+        // Inicialización del pool
     }
-    return instancia;
+    
+    // Método estático de acceso
+    public static ConexionBD getInstancia() {
+        if (instancia == null) {  // Primera verificación (sin lock)
+            synchronized (ConexionBD.class) {  // Lock solo si necesario
+                if (instancia == null) {  // Segunda verificación (con lock)
+                    instancia = new ConexionBD();
+                }
+            }
+        }
+        return instancia;
+    }
 }
 \end{lstlisting}
 
+\textbf{¿Por qué Singleton?}
+\begin{itemize}
+    \item Un pool de conexiones debe ser único en la aplicación
+    \item Evita múltiples pools compitiendo por conexiones
+    \item Centraliza la configuración de base de datos
+    \item Garantiza uso eficiente de recursos
+\end{itemize}
+
 \subsection{DAO Pattern (Data Access Object)}
-\textbf{Problema:} El código de negocio no debería contener SQL.
-\textbf{Solución:} Encapsulamos el acceso a datos en clases dedicadas 
-(\texttt{MySQLArticuloDAO}), abstraídas por interfaces.
+
+\subsubsection{Definición}
+
+El patrón DAO abstrae y encapsula todo acceso a la fuente de datos. El DAO gestiona la conexión con el origen de datos para obtener y almacenar datos \cite{alur2003core}.
+
+\subsubsection{Estructura en el Proyecto}
+
+\begin{lstlisting}[caption=Patrón DAO completo]
+// 1. INTERFAZ DAO (Contrato)
+public interface IArticuloDAO {
+    List<Articulo> listarTodos() throws SQLException;
+    Articulo obtenerPorId(int id) throws SQLException;
+    boolean crear(Articulo articulo) throws SQLException;
+}
+
+// 2. IMPLEMENTACIÓN DAO (Encapsula SQL)
+public class MySQLArticuloDAO implements IArticuloDAO {
+    @Override
+    public List<Articulo> listarTodos() throws SQLException {
+        String sql = "SELECT * FROM articulos";
+        // ... lógica JDBC encapsulada
+    }
+}
+
+// 3. USO EN CONTROLADOR (Desacoplado de SQL)
+public class ArticuloServlet extends HttpServlet {
+    private IArticuloDAO dao = new MySQLArticuloDAO();
+    
+    protected void doGet(...) {
+        List<Articulo> articulos = dao.listarTodos();
+        // No hay SQL aquí, solo lógica de negocio
+    }
+}
+\end{lstlisting}
+
+\textbf{Ventajas del patrón DAO:}
+\begin{itemize}
+    \item Separa lógica de negocio de lógica de persistencia
+    \item Facilita cambiar de tecnología de BD
+    \item Permite testear con implementaciones mock
+    \item Centraliza manejo de excepciones SQL
+\end{itemize}
 
 \subsection{MVC Pattern (Model-View-Controller)}
-\textbf{Problema:} Código espagueti (mezcla de HTML y Java).
-\textbf{Solución:} Jakarta EE estándar con Servlets (C) y JSPs (V).
+
+\subsubsection{Definición}
+
+MVC separa la aplicación en tres componentes interconectados: Modelo (datos), Vista (presentación) y Controlador (lógica) \cite{reenskaug1979thing}.
+
+\subsubsection{Implementación en el Proyecto}
+
+\paragraph{Modelo (Model)}
+
+\begin{lstlisting}[caption=Modelo - Entidades de dominio]
+package com.blog.model;
+
+public class Articulo {
+    private int id;
+    private String titulo;
+    private String contenido;
+    // Getters y setters
+}
+\end{lstlisting}
+
+\paragraph{Vista (View)}
+
+\begin{lstlisting}[language=HTML, caption=Vista - JSP con JSTL]
+<!-- index.jsp -->
+<c:forEach var="articulo" items="${articulos}">
+    <article>
+        <h2>${articulo.titulo}</h2>
+        <p>${articulo.contenido}</p>
+    </article>
+</c:forEach>
+\end{lstlisting}
+
+\paragraph{Controlador (Controller)}
+
+\begin{lstlisting}[caption=Controlador - Servlet]
+public class ArticuloServlet extends HttpServlet {
+    protected void doGet(HttpServletRequest request, 
+                        HttpServletResponse response) {
+        // 1. Obtener datos del modelo
+        List<Articulo> articulos = articuloDAO.listarTodos();
+        
+        // 2. Pasar datos a la vista
+        request.setAttribute("articulos", articulos);
+        
+        // 3. Delegar renderizado a la vista
+        request.getRequestDispatcher("/index.jsp")
+               .forward(request, response);
+    }
+}
+\end{lstlisting}
+
+\textbf{Flujo de datos en MVC:}
+
+\begin{verbatim}
+    Usuario  ---(HTTP GET)---> [Controlador]
+                                     |
+                                     v
+                            [DAO] ---> [Modelo]
+                                     |
+                                     v
+                                  [Vista] ---> Usuario
+\end{verbatim}
+
+\subsection{Object Pool Pattern}
+
+\subsubsection{Definición}
+
+El patrón Object Pool mantiene un conjunto de objetos reutilizables listos para usar, evitando la creación y destrucción costosa de objetos \cite{kircher2004pooling}.
+
+\subsubsection{Implementación en ConexionBD}
+
+\begin{lstlisting}[caption=Pool de Conexiones]
+public class ConexionBD {
+    private final List<PooledConnection> connectionPool;
+    private final int maxConnections = 10;
+    
+    // Obtener conexión del pool
+    public Connection getConexion() throws SQLException {
+        // 1. Buscar conexión disponible en el pool
+        for (PooledConnection pc : connectionPool) {
+            if (!pc.isInUse()) {
+                pc.setInUse(true);
+                return pc.getConnection();
+            }
+        }
+        
+        // 2. Si no hay disponible y no estamos al máximo, crear nueva
+        if (connectionPool.size() < maxConnections) {
+            Connection conn = createNewConnection();
+            PooledConnection pc = new PooledConnection(conn);
+            connectionPool.add(pc);
+            return conn;
+        }
+        
+        // 3. Si el pool está lleno, esperar o fallar
+        throw new SQLException("Pool lleno");
+    }
+    
+    // Devolver conexión al pool (no cerrarla)
+    public void cerrarConexion(Connection conn) {
+        for (PooledConnection pc : connectionPool) {
+            if (pc.getConnection() == conn) {
+                pc.setInUse(false);  // Marcar como disponible
+                return;
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Beneficios del Pool:}
+\begin{itemize}
+    \item Evita overhead de crear/cerrar conexiones
+    \item Reutiliza conexiones existentes
+    \item Limita número máximo de conexiones simultáneas
+    \item Mejora rendimiento significativamente
+\end{itemize}
+
+\subsection{Strategy Pattern (Implícito)}
+
+\subsubsection{Aplicación}
+
+Aunque no está explícitamente nombrado, el uso de interfaces DAO implementa el patrón Strategy:
+
+\begin{lstlisting}[caption=Strategy mediante interfaces]
+// La estrategia (algoritmo) de persistencia es intercambiable
+public class ArticuloServlet {
+    private IArticuloDAO strategy;  // Estrategia de persistencia
+    
+    public void setStrategy(IArticuloDAO newStrategy) {
+        this.strategy = newStrategy;
+    }
+    
+    // Usa la estrategia sin saber cuál es
+    List<Articulo> articulos = strategy.listarTodos();
+}
+
+// Estrategia concreta 1: MySQL
+class MySQLArticuloDAO implements IArticuloDAO { ... }
+
+// Estrategia concreta 2: PostgreSQL (potencial)
+class PostgresArticuloDAO implements IArticuloDAO { ... }
+\end{lstlisting}
+
+\newpage
+\section{Ejemplos Concretos de Código}
+
+\subsection{Flujo Completo: Listar Artículos}
+
+Veamos cómo todos estos principios y patrones trabajan juntos en un caso de uso real:
+
+\subsubsection{Paso 1: Usuario Solicita Ver Artículos}
+
+\begin{lstlisting}[caption=URL solicitada]
+GET http://localhost:8080/AdvancedFinalProject/articulos
+\end{lstlisting}
+
+\subsubsection{Paso 2: Filtros Interceptan (SoC)}
+
+\begin{lstlisting}[caption=CharacterEncodingFilter.java]
+// Filtro 1: Establecer codificación UTF-8
+public void doFilter(ServletRequest request, 
+                     ServletResponse response, 
+                     FilterChain chain) {
+    request.setCharacterEncoding("UTF-8");
+    response.setCharacterEncoding("UTF-8");
+    chain.doFilter(request, response);  // Siguiente filtro
+}
+\end{lstlisting}
+
+\begin{lstlisting}[caption=DatabaseCheckFilter.java]
+// Filtro 2: Verificar disponibilidad de BD
+public void doFilter(...) {
+    if (!isDatabaseAvailable()) {
+        response.sendRedirect("/setup");  // Redirigir a configuración
+        return;
+    }
+    chain.doFilter(request, response);  // Continuar
+}
+\end{lstlisting}
+
+\subsubsection{Paso 3: Servlet Controlador (MVC - Controller)}
+
+\begin{lstlisting}[caption=ArticuloServlet.java]
+public class ArticuloServlet extends HttpServlet {
+    // DIP: Depende de abstracción
+    private IArticuloDAO articuloDAO;
+    
+    @Override
+    public void init() {
+        // Inyección de dependencia
+        this.articuloDAO = new MySQLArticuloDAO();
+    }
+    
+    @Override
+    protected void doGet(HttpServletRequest request, 
+                        HttpServletResponse response) 
+            throws ServletException, IOException {
+        
+        String action = request.getParameter("action");
+        
+        if (action == null || action.equals("listar")) {
+            listarArticulos(request, response);
+        } else if (action.equals("ver")) {
+            verArticulo(request, response);
+        }
+    }
+    
+    private void listarArticulos(HttpServletRequest request, 
+                                HttpServletResponse response) 
+            throws ServletException, IOException {
+        try {
+            // 1. Obtener datos del modelo (DAO)
+            List<Articulo> articulos = articuloDAO.listarTodos();
+            
+            // 2. Pasar datos a la vista
+            request.setAttribute("articulos", articulos);
+            
+            // 3. Delegar renderizado a JSP
+            request.getRequestDispatcher("/index.jsp")
+                   .forward(request, response);
+                   
+        } catch (SQLException e) {
+            request.setAttribute("error", 
+                "Error al cargar artículos: " + e.getMessage());
+            request.getRequestDispatcher("/error.jsp")
+                   .forward(request, response);
+        }
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Paso 4: DAO Accede a Datos (DAO Pattern)}
+
+\begin{lstlisting}[caption=MySQLArticuloDAO.java]
+public class MySQLArticuloDAO implements IArticuloDAO {
+    private final ConexionBD conexionBD;
+    
+    public MySQLArticuloDAO() {
+        // Singleton: Una sola instancia de ConexionBD
+        this.conexionBD = ConexionBD.getInstancia();
+    }
+    
+    @Override
+    public List<Articulo> listarTodos() throws SQLException {
+        List<Articulo> articulos = new ArrayList<>();
+        
+        // SQL con JOIN para obtener nombre del autor
+        String sql = 
+            "SELECT a.id, a.titulo, a.contenido, " +
+            "       a.fecha_publicacion, a.autor_id, " +
+            "       COALESCE(u.nombre, 'Desconocido') as autor_nombre " +
+            "FROM articulos a " +
+            "LEFT JOIN usuarios u ON a.autor_id = u.id " +
+            "ORDER BY a.fecha_publicacion DESC";
+        
+        Connection conn = null;
+        try {
+            // Object Pool: Obtener conexión del pool
+            conn = conexionBD.getConexion();
+            
+            // PreparedStatement para prevenir SQL Injection
+            try (PreparedStatement stmt = conn.prepareStatement(sql);
+                 ResultSet rs = stmt.executeQuery()) {
+                
+                while (rs.next()) {
+                    Articulo articulo = new Articulo();
+                    articulo.setId(rs.getInt("id"));
+                    articulo.setTitulo(rs.getString("titulo"));
+                    articulo.setContenido(rs.getString("contenido"));
+                    // ... mapear resto de campos
+                    articulos.add(articulo);
+                }
+            }
+        } finally {
+            // IMPORTANTE: Devolver conexión al pool, no cerrarla
+            if (conn != null) {
+                conexionBD.cerrarConexion(conn);
+            }
+        }
+        
+        return articulos;
+    }
+}
+\end{lstlisting}
+
+\subsubsection{Paso 5: Vista Renderiza (MVC - View)}
+
+\begin{lstlisting}[language=HTML, caption=index.jsp]
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Odally | Blog</title>
+</head>
+<body>
+    <h1>Artículos Recientes</h1>
+    
+    <!-- JSTL: DRY - No repetir scriptlets -->
+    <c:forEach var="articulo" items="${articulos}">
+        <article>
+            <h2>${articulo.titulo}</h2>
+            <p class="meta">
+                Por ${articulo.autorNombre} 
+                el ${articulo.fechaPublicacionFormateada}
+            </p>
+            <p>${articulo.contenido}</p>
+            <a href="articulos?action=ver&id=${articulo.id}">
+                Leer más
+            </a>
+        </article>
+    </c:forEach>
+</body>
+</html>
+\end{lstlisting}
+
+\subsection{Análisis del Flujo}
+
+\begin{enumerate}
+    \item \textbf{SRP:} Cada clase tiene una responsabilidad
+    \begin{itemize}
+        \item Filtros: Solo filtrado
+        \item Servlet: Solo orquestación
+        \item DAO: Solo persistencia
+        \item Vista: Solo presentación
+    \end{itemize}
+    
+    \item \textbf{OCP:} Podemos cambiar la implementación DAO sin tocar el servlet
+    
+    \item \textbf{LSP:} Cualquier implementación de \texttt{IArticuloDAO} funcionaría
+    
+    \item \textbf{ISP:} Interfaces específicas (\texttt{IArticuloDAO}, no un DAO genérico gigante)
+    
+    \item \textbf{DIP:} Servlet depende de \texttt{IArticuloDAO} (abstracción), no de MySQL
+    
+    \item \textbf{DRY:} 
+    \begin{itemize}
+        \item Pool de conexiones en un solo lugar
+        \item JSTL elimina repetición de scriptlets
+    \end{itemize}
+    
+    \item \textbf{SoC:} Separación clara entre capas (Filter, Controller, DAO, View)
+    
+    \item \textbf{Patrones:}
+    \begin{itemize}
+        \item Singleton: \texttt{ConexionBD}
+        \item DAO: Capa de persistencia
+        \item MVC: Arquitectura general
+        \item Object Pool: Pool de conexiones
+    \end{itemize}
+\end{enumerate}
+
+\newpage
+\section{Conclusiones}
+
+\subsection{Beneficios Obtenidos}
+
+La aplicación rigurosa de principios SOLID, principios de arquitectura de paquetes y patrones de diseño en el proyecto Odally | Blog ha resultado en:
+
+\begin{enumerate}
+    \item \textbf{Mantenibilidad:} El código es fácil de entender y modificar gracias a SRP y separación de responsabilidades
+    
+    \item \textbf{Extensibilidad:} Se pueden agregar nuevas funcionalidades (como cambiar de BD) sin modificar código existente (OCP)
+    
+    \item \textbf{Testabilidad:} Las interfaces permiten crear mocks para pruebas unitarias (DIP)
+    
+    \item \textbf{Reutilización:} Los paquetes están organizados para reutilización (REP, CRP)
+    
+    \item \textbf{Robustez:} Pool de conexiones con reintentos automáticos mejora la resiliencia
+    
+    \item \textbf{Seguridad:} PreparedStatements previenen SQL injection, contraseñas hasheadas, filtros de autenticación
+\end{enumerate}
+
+\subsection{Lecciones Aprendidas}
+
+\begin{itemize}
+    \item Los principios SOLID no son solo teoría -- se aplican directamente en código real
+    \item La inversión de dependencias (DIP) es clave para testear y mantener código
+    \item Los patrones de diseño resuelven problemas recurrentes de forma elegante
+    \item La simplicidad (KISS) es preferible a la complejidad innecesaria
+    \item La separación de responsabilidades (SoC) hace el código más comprensible
+\end{itemize}
+
+\subsection{Trabajo Futuro}
+
+Posibles mejoras al proyecto:
+
+\begin{enumerate}
+    \item \textbf{Inyección de Dependencias:} Usar un framework como CDI para inyectar DAOs en lugar de \texttt{new MySQLArticuloDAO()}
+    
+    \item \textbf{Testing:} Agregar pruebas unitarias con JUnit y Mockito aprovechando las interfaces
+    
+    \item \textbf{Pool Profesional:} Migrar a HikariCP o Apache DBCP para pool de conexiones más robusto
+    
+    \item \textbf{Seguridad:} Implementar bcrypt en lugar de SHA-256 para contraseñas
+    
+    \item \textbf{Logging:} Usar SLF4J + Logback en lugar de \texttt{System.out.println}
+\end{enumerate}
+
+\newpage
+\begin{thebibliography}{9}
+
+\bibitem{martin2000design}
+Martin, Robert C. (2000).
+\textit{Design Principles and Design Patterns}.
+Object Mentor, Inc.
+
+\bibitem{martin2003agile}
+Martin, Robert C. (2003).
+\textit{Agile Software Development: Principles, Patterns, and Practices}.
+Prentice Hall.
+
+\bibitem{martin2017clean}
+Martin, Robert C. (2017).
+\textit{Clean Architecture: A Craftsman's Guide to Software Structure and Design}.
+Prentice Hall.
+
+\bibitem{gamma1995design}
+Gamma, Erich; Helm, Richard; Johnson, Ralph; Vlissides, John (1995).
+\textit{Design Patterns: Elements of Reusable Object-Oriented Software}.
+Addison-Wesley.
+
+\bibitem{fowler2002patterns}
+Fowler, Martin (2002).
+\textit{Patterns of Enterprise Application Architecture}.
+Addison-Wesley.
+
+\bibitem{liskov1994behavioral}
+Liskov, Barbara H.; Wing, Jeannette M. (1994).
+\textit{A Behavioral Notion of Subtyping}.
+ACM Transactions on Programming Languages and Systems, Vol. 16, No. 6.
+
+\bibitem{hunt2019pragmatic}
+Hunt, Andrew; Thomas, David (2019).
+\textit{The Pragmatic Programmer: Your Journey to Mastery} (20th Anniversary Edition).
+Addison-Wesley.
+
+\bibitem{beck2000extreme}
+Beck, Kent (2000).
+\textit{Extreme Programming Explained: Embrace Change}.
+Addison-Wesley.
+
+\bibitem{dijkstra1982role}
+Dijkstra, Edsger W. (1982).
+\textit{On the Role of Scientific Thought}.
+Selected Writings on Computing: A Personal Perspective.
+
+\bibitem{raymond2003art}
+Raymond, Eric S. (2003).
+\textit{The Art of Unix Programming}.
+Addison-Wesley.
+
+\bibitem{alur2003core}
+Alur, Deepak; Crupi, John; Malks, Dan (2003).
+\textit{Core J2EE Patterns: Best Practices and Design Strategies} (2nd Edition).
+Prentice Hall.
+
+\bibitem{reenskaug1979thing}
+Reenskaug, Trygve (1979).
+\textit{THING-MODEL-VIEW-EDITOR: An Example from a Planning System}.
+Xerox PARC Technical Note.
+
+\bibitem{kircher2004pooling}
+Kircher, Michael; Jain, Prashant (2004).
+\textit{Pattern-Oriented Software Architecture, Volume 3: Patterns for Resource Management}.
+Wiley.
+
+\end{thebibliography}
 
 \end{document}

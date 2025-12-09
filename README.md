@@ -564,9 +564,16 @@ Este proyecto fue desarrollado con fines educativos como parte de un trabajo uni
 
 ## 👥 Autores
 
-* **Alejandra Munevar** - Universidad Distrital Francisco José de Caldas
-* **Dylan Silva** - Universidad Distrital Francisco José de Caldas
-* **Sergio Moreno** - Universidad Distrital Francisco José de Caldas
+| Nombre Completo | Código |
+|-----------------|--------|
+| Dylan David Silva Orrego | 20242020130 |
+| Maria Alejandra Munevar Barrera | 20242020145 |
+
+**Profesora:** Lilia Marcela Espinosa Rodríguez  
+**Materia:** Programación Avanzada  
+**Universidad:** Universidad Distrital Francisco José de Caldas  
+**Facultad:** Facultad de Ingeniería  
+**Programa:** Ingeniería de Sistemas
 
 ---
 

@@ -1,0 +1,371 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{geometry}
+\geometry{left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,calc}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    
+    {\LARGE Universidad Distrital Francisco José de Caldas\par}
+    {\large Facultad de Ingeniería\par}
+    {\large Ingeniería de Sistemas\par}
+    \vspace{2cm}
+    
+    {\huge\bfseries Diagramas UML y de Arquitectura\par}
+    {\huge\bfseries Odally | Blog\par}
+    \vspace{1.5cm}
+    
+    {\large
+    \begin{tabular}{l}
+    Dylan David Silva Orrego -- 20242020130 \\
+    Maria Alejandra Munevar Barrera -- 20242020145
+    \end{tabular}\par}
+    \vspace{1.5cm}
+    
+    {\large \emph{Profesora:} Lilia Marcela Espinosa Rodríguez\par}
+    \vspace{2cm}
+    
+    {\large Proyecto Final de Programación Avanzada\par}
+    {\large Semestre 2025-3\par}
+    \vfill
+    
+    {\large Diciembre de 2025, Bogotá D.C.\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+Este documento presenta los diagramas UML y de arquitectura del sistema de gestión de contenidos \textbf{Odally | Blog}, desarrollado con tecnologías JavaWeb (Servlets/JSP) y MySQL.
+
+Los diagramas incluidos en este documento ilustran:
+\begin{itemize}
+    \item La estructura de clases del sistema
+    \item La organización en paquetes
+    \item Los casos de uso por tipo de actor
+    \item Los flujos de secuencia principales
+    \item La arquitectura de despliegue
+    \item Los componentes del sistema
+\end{itemize}
+
+\section{Diagrama de Paquetes}
+
+El sistema está organizado en los siguientes paquetes:
+
+\subsection{Estructura de Paquetes}
+
+\begin{itemize}
+    \item \textbf{com.blog.model} - Entidades del dominio (POJOs)
+    \begin{itemize}
+        \item Articulo.java
+        \item Usuario.java
+    \end{itemize}
+    
+    \item \textbf{com.blog.dao} - Capa de acceso a datos
+    \begin{itemize}
+        \item IArticuloDAO.java (interfaz)
+        \item IUsuarioDAO.java (interfaz)
+        \item MySQLArticuloDAO.java (implementación)
+        \item MySQLUsuarioDAO.java (implementación)
+        \item ConexionBD.java (Singleton)
+        \item DatabaseHealthCheck.java
+    \end{itemize}
+    
+    \item \textbf{com.blog.controller} - Servlets (Controladores MVC)
+    \begin{itemize}
+        \item ArticuloServlet.java
+        \item AdminArticuloServlet.java
+        \item AdminUsuariosServlet.java
+        \item LoginServlet.java
+        \item LogoutServlet.java
+        \item RegisterServlet.java
+        \item SetupServlet.java
+    \end{itemize}
+    
+    \item \textbf{com.blog.filter} - Filtros de servlet
+    \begin{itemize}
+        \item AuthFilter.java
+        \item CharacterEncodingFilter.java
+        \item DatabaseCheckFilter.java
+    \end{itemize}
+    
+    \item \textbf{com.blog.util} - Utilidades
+    \begin{itemize}
+        \item PasswordUtil.java
+    \end{itemize}
+\end{itemize}
+
+\subsection{Dependencias entre Paquetes}
+
+Las dependencias fluyen en la siguiente dirección:
+
+\begin{verbatim}
+com.blog.controller  ------>  com.blog.dao
+        |                          |
+        |                          v
+        v                    com.blog.model
+   com.blog.filter              
+        |
+        v
+   com.blog.dao
+   
+com.blog.util  <------  com.blog.controller
+\end{verbatim}
+
+\textbf{Principio ADP (Acyclic Dependencies Principle):} No existen ciclos en el grafo de dependencias. Esto garantiza que los paquetes puedan compilarse y desplegarse independientemente.
+
+\section{Diagrama de Casos de Uso}
+
+\subsection{Actores del Sistema}
+
+\begin{itemize}
+    \item \textbf{Visitante:} Usuario no autenticado
+    \item \textbf{Usuario Autor:} Usuario autenticado con rol ``autor''
+    \item \textbf{Administrador:} Usuario autenticado con rol ``admin''
+\end{itemize}
+
+\subsection{Casos de Uso por Actor}
+
+\subsubsection{Visitante}
+\begin{itemize}
+    \item Ver lista de artículos
+    \item Leer artículo completo
+    \item Registrarse en el sistema
+    \item Iniciar sesión
+\end{itemize}
+
+\subsubsection{Usuario Autor}
+\begin{itemize}
+    \item Todos los casos de uso de Visitante
+    \item Acceder al Dashboard
+    \item Crear nuevo artículo
+    \item Editar artículo propio
+    \item Eliminar artículo propio
+    \item Cerrar sesión
+\end{itemize}
+
+\subsubsection{Administrador}
+\begin{itemize}
+    \item Todos los casos de uso de Usuario Autor
+    \item Gestionar usuarios (listar, cambiar rol, eliminar)
+    \item Editar cualquier artículo
+    \item Eliminar cualquier artículo
+    \item Configurar base de datos
+\end{itemize}
+
+\section{Diagrama de Secuencia: Autenticación}
+
+\subsection{Flujo de Autenticación Exitosa}
+
+\begin{enumerate}
+    \item Usuario envía credenciales (username, password) vía formulario POST
+    \item \texttt{LoginServlet} recibe la petición
+    \item \texttt{LoginServlet} llama a \texttt{IUsuarioDAO.buscarPorUsername(username)}
+    \item \texttt{MySQLUsuarioDAO} obtiene conexión del pool
+    \item \texttt{MySQLUsuarioDAO} ejecuta query SQL
+    \item MySQL retorna ResultSet
+    \item \texttt{MySQLUsuarioDAO} mapea ResultSet a objeto Usuario
+    \item \texttt{MySQLUsuarioDAO} devuelve conexión al pool
+    \item \texttt{LoginServlet} recibe objeto Usuario
+    \item \texttt{LoginServlet} llama a \texttt{PasswordUtil.verificarPassword()}
+    \item \texttt{PasswordUtil} compara hash de password ingresado con almacenado
+    \item Si coinciden:
+    \begin{itemize}
+        \item Crear sesión HTTP
+        \item Almacenar usuario en sesión: \texttt{session.setAttribute("usuario", usuario)}
+        \item Redirigir a Dashboard: \texttt{/admin/articulos}
+    \end{itemize}
+    \item Si no coinciden:
+    \begin{itemize}
+        \item Forward a \texttt{login.jsp} con mensaje de error
+    \end{itemize}
+\end{enumerate}
+
+\section{Diagrama de Secuencia: Reconexión a BD}
+
+\subsection{Flujo de Reconexión Automática}
+
+El sistema implementa un mecanismo de reintentos con backoff exponencial:
+
+\begin{enumerate}
+    \item Servlet solicita listar artículos
+    \item DAO llama a \texttt{ConexionBD.getConexion()}
+    \item \texttt{ConexionBD} intenta obtener conexión del pool
+    \item Si conexión disponible:
+    \begin{itemize}
+        \item Validar conexión con \texttt{SELECT 1}
+        \item Si válida, retornar conexión
+        \item Si inválida, cerrar y crear nueva
+    \end{itemize}
+    \item Si pool vacío:
+    \begin{itemize}
+        \item Intento 1: Crear nueva conexión
+        \item Si falla, esperar 1000ms
+        \item Intento 2: Reintentar con backoff
+        \item Si falla, esperar 2000ms
+        \item Intento 3: Último reintento
+        \item Si falla definitivamente, lanzar SQLException
+    \end{itemize}
+\end{enumerate}
+
+\section{Arquitectura del Sistema}
+
+\subsection{Arquitectura en Capas}
+
+El sistema sigue una arquitectura en capas claramente definida:
+
+\begin{enumerate}
+    \item \textbf{Capa de Presentación}
+    \begin{itemize}
+        \item JSP con JSTL
+        \item Bootstrap 5 para estilos
+    \end{itemize}
+    
+    \item \textbf{Capa de Control}
+    \begin{itemize}
+        \item Filtros (AuthFilter, DatabaseCheckFilter, CharacterEncodingFilter)
+        \item Servlets (ArticuloServlet, AdminArticuloServlet, etc.)
+    \end{itemize}
+    
+    \item \textbf{Capa de Negocio}
+    \begin{itemize}
+        \item POJOs (Articulo, Usuario)
+        \item Utilidades (PasswordUtil)
+    \end{itemize}
+    
+    \item \textbf{Capa de Persistencia}
+    \begin{itemize}
+        \item Interfaces DAO (IArticuloDAO, IUsuarioDAO)
+        \item Implementaciones DAO (MySQLArticuloDAO, MySQLUsuarioDAO)
+        \item Pool de conexiones (ConexionBD)
+    \end{itemize}
+    
+    \item \textbf{Capa de Datos}
+    \begin{itemize}
+        \item MySQL 8.0+
+        \item Base de datos: blog\_db
+        \item Tablas: articulos, usuarios
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Flujo de una Petición HTTP}
+
+\begin{verbatim}
+1. Usuario hace clic en "Leer más"
+   ↓
+2. Navegador envía GET /articulos?action=ver&id=1
+   ↓
+3. CharacterEncodingFilter establece UTF-8
+   ↓
+4. DatabaseCheckFilter verifica disponibilidad de BD
+   ↓
+5. ArticuloServlet.doGet() recibe petición
+   ↓
+6. ArticuloServlet llama a articuloDAO.obtenerPorId(1)
+   ↓
+7. MySQLArticuloDAO.obtenerPorId()
+   ↓
+8. ConexionBD.getConexion() retorna conexión del pool
+   ↓
+9. Ejecutar SQL: SELECT * FROM articulos WHERE id = ?
+   ↓
+10. MySQL retorna ResultSet
+    ↓
+11. Mapear ResultSet a objeto Articulo
+    ↓
+12. ConexionBD.cerrarConexion() devuelve al pool
+    ↓
+13. ArticuloServlet recibe objeto Articulo
+    ↓
+14. request.setAttribute("articulo", articulo)
+    ↓
+15. forward a articulo.jsp
+    ↓
+16. JSP renderiza HTML con datos
+    ↓
+17. Respuesta HTTP enviada al navegador
+\end{verbatim}
+
+\section{Principios Aplicados en la Arquitectura}
+
+\subsection{Separación de Responsabilidades (SoC)}
+
+Cada capa tiene responsabilidades bien definidas y no se mezclan:
+\begin{itemize}
+    \item \textbf{Presentación:} Solo renderiza datos, no ejecuta lógica de negocio
+    \item \textbf{Control:} Solo orquesta flujo, delega operaciones
+    \item \textbf{Negocio:} Solo contiene lógica de dominio
+    \item \textbf{Persistencia:} Solo accede a datos, no formatea para presentación
+\end{itemize}
+
+\subsection{Inversión de Dependencias (DIP)}
+
+Los módulos de alto nivel (Servlets) dependen de abstracciones (Interfaces DAO), no de implementaciones concretas (MySQLArticuloDAO).
+
+\subsection{Principio Abierto/Cerrado (OCP)}
+
+El sistema puede extenderse (agregar PostgreSQLArticuloDAO) sin modificar código existente.
+
+\section{Patrones de Diseño en la Arquitectura}
+
+\subsection{Patrón MVC (Model-View-Controller)}
+
+\begin{itemize}
+    \item \textbf{Model:} Articulo, Usuario, DAOs
+    \item \textbf{View:} JSP files
+    \item \textbf{Controller:} Servlets
+\end{itemize}
+
+\subsection{Patrón Singleton}
+
+\texttt{ConexionBD} garantiza una única instancia del pool de conexiones.
+
+\subsection{Patrón DAO (Data Access Object)}
+
+Abstrae el acceso a datos mediante interfaces.
+
+\subsection{Patrón Object Pool}
+
+Pool de conexiones a base de datos para reutilización.
+
+\subsection{Patrón Strategy (implícito)}
+
+Las interfaces DAO permiten intercambiar estrategias de persistencia.
+
+\section{Conclusiones}
+
+Los diagramas presentados en este documento ilustran una arquitectura bien diseñada que:
+
+\begin{itemize}
+    \item Separa claramente las responsabilidades
+    \item Minimiza el acoplamiento entre capas
+    \item Maximiza la cohesión dentro de cada paquete
+    \item Facilita el testing mediante inversión de dependencias
+    \item Permite extensión sin modificación (OCP)
+    \item Aplica patrones de diseño de la industria
+\end{itemize}
+
+Para ver los diagramas en formato Mermaid (renderizables en GitHub), consultar el archivo \texttt{DIAGRAMS.md} en esta misma carpeta.
+
+\vspace{2cm}
+
+\begin{center}
+\textbf{Proyecto:} Odally | Blog \\
+\textbf{Equipo:} Dylan David Silva Orrego, Maria Alejandra Munevar Barrera \\
+\textbf{Profesora:} Lilia Marcela Espinosa Rodríguez \\
+\textbf{Universidad Distrital Francisco José de Caldas - 2025}
+\end{center}
+
+\end{document}
