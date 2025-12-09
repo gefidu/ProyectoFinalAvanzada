@@ -55,4 +55,21 @@ public interface IUsuarioDAO {
      * @throws SQLException Error de base de datos
      */
     boolean actualizarRol(int id, String nuevoRol) throws SQLException;
+
+    /**
+     * Elimina un usuario por su ID
+     * 
+     * @param id ID del usuario a eliminar
+     * @return true si se eliminó correctamente
+     * @throws SQLException Error de base de datos
+     */
+    boolean eliminar(int id) throws SQLException;
+
+    /**
+     * Elimina todos los usuarios excepto los administradores
+     * 
+     * @return Número de usuarios eliminados
+     * @throws SQLException Error de base de datos
+     */
+    int eliminarTodosExceptoAdmins() throws SQLException;
 }

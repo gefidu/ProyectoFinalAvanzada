@@ -1,11 +1,11 @@
-# Sistema de Gestión de Contenidos (Blog) JavaWeb
+# Odally - Sistema de Gestión de Contenidos (Blog)
 
 ![Java](https://img.shields.io/badge/Java-21+-blue.svg)
 ![Jakarta EE](https://img.shields.io/badge/Jakarta%20EE-10-orange.svg)
 ![MySQL](https://img.shields.io/badge/MySQL-8.0+-blue.svg)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-purple.svg)
 
-Este proyecto es un sistema de gestión de contenidos (Blog) desarrollado con JavaWeb (Servlets/JSP) como parte de un trabajo universitario. La aplicación sigue el patrón de arquitectura MVC (Modelo-Vista-Controlador) y utiliza el patrón DAO (Data Access Object) para la capa de persistencia, aplicando principios SOLID para garantizar código limpio y mantenible.
+**Odally** es un sistema de gestión de contenidos (Blog) moderno y elegante desarrollado con JavaWeb (Servlets/JSP) como parte de un trabajo universitario. La aplicación sigue el patrón de arquitectura MVC (Modelo-Vista-Controlador) y utiliza el patrón DAO (Data Access Object) para la capa de persistencia, aplicando principios SOLID para garantizar código limpio y mantenible.
 
 ## 📋 Tabla de Contenidos
 
@@ -33,6 +33,11 @@ Este proyecto es un sistema de gestión de contenidos (Blog) desarrollado con Ja
 - ✅ Sistema de autenticación seguro
 - ✅ Dashboard con estadísticas
 - ✅ CRUD completo de artículos (Crear, Leer, Actualizar, Eliminar)
+- ✅ **Gestión de usuarios** (solo administradores)
+  - Listar todos los usuarios
+  - Promover/demover roles (admin/autor)
+  - Eliminar usuarios individuales
+  - Eliminar todos los usuarios no-administradores
 - ✅ Gestión de contenido en tiempo real
 - ✅ Protección de rutas mediante filtros
 
@@ -159,19 +164,36 @@ web/WEB-INF/lib/
 
 ### Configurar la Conexión a la Base de Datos
 
-Editar el archivo `src/java/com/blog/dao/ConexionBD.java`:
+**Odally** ofrece dos métodos para configurar la conexión a la base de datos:
 
-```java
-private static final String URL = "jdbc:mysql://localhost:3306/blog_db?useSSL=false&serverTimezone=UTC";
-private static final String USUARIO = "root";  // Tu usuario de MySQL
-private static final String PASSWORD = "";      // Tu contraseña de MySQL
+#### Opción 1: Interfaz Web de Configuración (Recomendado) ⭐
+
+1. Al iniciar la aplicación por primera vez, si la conexión a la base de datos falla, será redirigido automáticamente a la página de configuración
+2. También puede acceder manualmente a: `http://localhost:8080/AdvancedFinalProject/setup`
+3. Complete el formulario con los datos de su servidor MySQL:
+   - **Host**: localhost (o la dirección de su servidor)
+   - **Puerto**: 3306 (puerto por defecto de MySQL)
+   - **Base de datos**: blog_db
+   - **Usuario**: root (o su usuario de MySQL)
+   - **Contraseña**: su contraseña de MySQL (dejar en blanco si no tiene)
+4. Click en "Probar Conexión" para verificar que los datos sean correctos
+5. Si la conexión es exitosa, click en "Guardar Configuración"
+6. La aplicación guardará la configuración en `db.properties` y estará lista para usar
+
+#### Opción 2: Edición Manual del Archivo
+
+Editar el archivo `src/java/com/blog/dao/db.properties`:
+
+```properties
+db.url=jdbc:mysql://localhost:3306/blog_db?useSSL=false&serverTimezone=UTC
+db.user=root
+db.password=
 ```
 
 **⚠️ IMPORTANTE - Seguridad:**
-- Las credenciales están hardcodeadas solo para propósitos educativos
-- En producción, usar variables de entorno o un archivo de configuración externo
+- Las credenciales se almacenan en el archivo `db.properties` solo para propósitos educativos
+- En producción, usar variables de entorno o un sistema de gestión de secretos
 - Nunca commitear credenciales reales al repositorio
-- Si usas un usuario diferente a `root` o tienes contraseña, actualiza estos valores
 
 ## 📁 Estructura del Proyecto
 
@@ -256,7 +278,7 @@ ant dist
 
 ### Navegar por la Aplicación
 
-#### Área Pública (Sin login)
+### Área Pública (Sin login)
 - **Inicio:** http://localhost:8080/AdvancedFinalProject/articulos
 - **Ver artículo:** Click en "Leer más" en cualquier artículo
 
@@ -265,6 +287,7 @@ ant dist
 2. Ingresar credenciales (ver sección siguiente)
 3. Acceso al Dashboard: http://localhost:8080/AdvancedFinalProject/admin/articulos?action=dashboard
 4. Gestionar artículos: http://localhost:8080/AdvancedFinalProject/admin/articulos?action=listar
+5. **Gestionar usuarios (solo admins):** http://localhost:8080/AdvancedFinalProject/admin/usuarios
 
 ## 🔐 Credenciales de Acceso
 
@@ -363,3 +386,27 @@ Este proyecto fue desarrollado con fines educativos como parte de un trabajo uni
 **Universidad Distrital Francisco José de Caldas**  
 Ingeniería de Sistemas  
 Programación Avanzada - 2025
+
+---
+
+## ✨ Características Destacadas de Odally
+
+### 🎨 Diseño Moderno y Elegante
+- Paleta de colores cuidadosamente seleccionada con tonos violeta/índigo
+- Tipografía profesional con Inter y Literata
+- Cards con efectos hover y sombras suaves
+- Diseño completamente responsive
+
+### 👥 Gestión Avanzada de Usuarios
+- Panel de administración exclusivo para gestionar usuarios
+- Protecciones de seguridad:
+  - No se puede eliminar el usuario administrador principal
+  - No se puede auto-eliminar un administrador
+  - Confirmación doble para eliminación masiva
+- Promoción/demotion de roles de forma sencilla
+
+### 🔒 Seguridad Robusta
+- Contraseñas hasheadas con SHA-256
+- Pool de conexiones a base de datos con reintentos automáticos
+- Validación de entrada en todos los formularios
+- Protección contra SQL injection mediante PreparedStatements

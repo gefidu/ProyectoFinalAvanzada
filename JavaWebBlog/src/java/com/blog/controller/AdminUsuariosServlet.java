@@ -46,6 +46,12 @@ public class AdminUsuariosServlet extends HttpServlet {
                 case "demover":
                     cambiarRol(request, response, "autor");
                     break;
+                case "eliminar":
+                    eliminarUsuario(request, response);
+                    break;
+                case "eliminarTodos":
+                    eliminarTodosExceptoAdmins(request, response);
+                    break;
                 default:
                     listarUsuarios(request, response);
             }
@@ -75,6 +81,38 @@ public class AdminUsuariosServlet extends HttpServlet {
 
         usuarioDAO.actualizarRol(id, nuevoRol);
         response.sendRedirect(request.getContextPath() + "/admin/usuarios");
+    }
+
+    private void eliminarUsuario(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+
+        // Get current session user
+        HttpSession session = request.getSession(false);
+        Usuario currentUser = (Usuario) session.getAttribute("usuario");
+
+        // Protection: Cannot delete self
+        if (currentUser.getId() == id) {
+            response.sendRedirect(request.getContextPath() + "/admin/usuarios?error=no-self-delete");
+            return;
+        }
+
+        // Protection: Cannot delete user with ID 1 (super admin)
+        if (id == 1) {
+            response.sendRedirect(request.getContextPath() + "/admin/usuarios?error=protected-user");
+            return;
+        }
+
+        // Delete the user
+        usuarioDAO.eliminar(id);
+        response.sendRedirect(request.getContextPath() + "/admin/usuarios");
+    }
+
+    private void eliminarTodosExceptoAdmins(HttpServletRequest request, HttpServletResponse response)
+            throws SQLException, IOException {
+        // Delete all non-admin users
+        int deletedCount = usuarioDAO.eliminarTodosExceptoAdmins();
+        response.sendRedirect(request.getContextPath() + "/admin/usuarios?deleted=" + deletedCount);
     }
 
     private boolean esAdmin(HttpServletRequest request) {

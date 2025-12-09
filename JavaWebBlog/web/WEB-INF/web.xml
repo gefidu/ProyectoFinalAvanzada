@@ -70,6 +70,16 @@
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
 
+    <!-- SetupServlet - Database Configuration -->
+    <servlet>
+        <servlet-name>SetupServlet</servlet-name>
+        <servlet-class>com.blog.controller.SetupServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>SetupServlet</servlet-name>
+        <url-pattern>/setup</url-pattern>
+    </servlet-mapping>
+
     <!-- AdminUsuariosServlet - User Management -->
     <servlet>
         <servlet-name>AdminUsuariosServlet</servlet-name>
