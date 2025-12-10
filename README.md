@@ -339,224 +339,37 @@ Este proyecto implementa los principios SOLID de diseño de software:
 
 ## 📚 Documentación Adicional
 
-Hemos preparado documentación técnica exhaustiva para este proyecto:
+Hemos preparado documentación detallada adicional para este proyecto:
 
-### 📖 [Principios y Patrones de Diseño (LaTeX)](./tex%20archives/PRINCIPIOS_Y_PATRONES.tex)
-Documento técnico completo que explica en detalle:
-- **Principios SOLID** con ejemplos del código del proyecto
-- **Principios de Arquitectura de Paquetes** (REP, CCP, CRP, ADP, SDP, SAP)
-- **Otros principios de diseño** (DRY, KISS, YAGNI, SoC, LoD)
-- **Patrones de diseño implementados** (Singleton, DAO, MVC, Object Pool, Strategy)
-- **Referencias bibliográficas** (Martin, Fowler, GoF)
-- **Ejemplos de código completos** con análisis detallado
+- **[Manual de Usuario (LaTeX)](./tex archives/USER_MANUAL.tex):** Guía completa de uso del sistema.
+  > 💡 **Cómo compilar:** Puede subir este archivo a [Overleaf](https://www.overleaf.com/) o compilarlo localmente si tiene TeX Live/MiKTeX instalado (`pdflatex "tex archives/USER_MANUAL.tex"`).
 
-> 💡 **Cómo compilar:** Puede subir este archivo a [Overleaf](https://www.overleaf.com/) o compilarlo localmente con:
-> ```bash
-> cd "tex archives"
-> pdflatex PRINCIPIOS_Y_PATRONES.tex
-> bibtex PRINCIPIOS_Y_PATRONES
-> pdflatex PRINCIPIOS_Y_PATRONES.tex
-> pdflatex PRINCIPIOS_Y_PATRONES.tex
-> ```
+- **[Principios de Ingeniería y Patrones (LaTeX)](./tex archives/PRINCIPIOS_Y_PATRONES.tex):** Documentación exhaustiva de SOLID, DRY, KISS, SoC y Patrones de Diseño, con referencias cruzadas al código.
+  > 💡 **Cómo compilar:** Igualmente, compatible con cualquier compilador LaTeX estándar.
 
-### 📊 [Diagramas del Sistema (Mermaid)](./tex%20archives/Diagramas/DIAGRAMS.md)
-Diagramas UML y de arquitectura del sistema:
-- **Diagrama de Clases Completo** - Todas las clases con relaciones
-- **Diagrama de Paquetes** - Organización y dependencias
-- **Diagrama de Casos de Uso** - Funcionalidades por actor
-- **Diagramas de Secuencia** - Flujos de autenticación y reconexión
-- **Diagrama de Despliegue** - Arquitectura física
-- **Diagrama de Componentes** - Componentes del sistema
-
-> 💡 **Cómo ver:** GitHub renderiza estos diagramas automáticamente. También puede copiar el código a [Mermaid Live Editor](https://mermaid.live/).
-
-### 📘 [Manual de Usuario (LaTeX)](./tex%20archives/ManualDeUsuario/main.tex)
-Guía completa de uso del sistema para usuarios finales.
-
-> 💡 **Compilar con:** `pdflatex main.tex` desde el directorio ManualDeUsuario
-
-### 🔍 Código Fuente Documentado
-Todo el código Java incluye **Javadoc completo** con:
-- Descripción de cada clase y método
-- Principios SOLID aplicados
-- Patrones de diseño implementados
-- Parámetros, valores de retorno y excepciones
-- Referencias cruzadas al documento LaTeX
+- **[Diagramas del Proyecto (Mermaid)](./tex archives/DIAGRAMS.md):** Diagramas de Clases y Casos de Uso del sistema.
+  > 💡 **Cómo ver:** GitHub renderiza estos diagramas automáticamente. También puede copiar el código a [Mermaid Live Editor](https://mermaid.live/).
 
 ## 🐛 Solución de Problemas
 
 ### Error: "ClassNotFoundException: com.mysql.cj.jdbc.Driver"
-- **Causa:** El driver MySQL no está en el classpath
-- **Solución:** 
-  1. Descargar `mysql-connector-j-8.0.33.jar` (o superior)
-  2. Colocar en `web/WEB-INF/lib/`
-  3. Reiniciar el servidor Tomcat
+- **Solución:** Verificar que `mysql-connector-j-*.jar` esté en `web/WEB-INF/lib/`
 
 ### Error: "Cannot connect to database"
-- **Causa:** MySQL no está ejecutándose o la configuración es incorrecta
-- **Solución:** 
-  1. Verificar que MySQL esté ejecutándose:
-     ```bash
-     # Windows con XAMPP
-     Abrir XAMPP Control Panel y verificar que MySQL esté "Running"
-     
-     # Linux
-     sudo systemctl status mysql
-     ```
-  2. Usar la **página de configuración automática**: `http://localhost:8080/AdvancedFinalProject/setup`
-  3. Verificar credenciales (usuario, contraseña, nombre de BD)
-  4. Verificar que la base de datos `blog_db` exista:
-     ```sql
-     SHOW DATABASES;
-     ```
-  5. Si es necesario, ejecutar el script: `database/schema.sql` o `setup_database.sql`
-
-### Puerto 8080 ya está en uso
-
-#### Síntomas:
-- Error al iniciar Tomcat: `Address already in use: bind`
-- No se puede acceder a `http://localhost:8080`
-
-#### Opción 1: Cambiar el puerto de Tomcat (Requiere permisos de administrador)
-
-**En Windows:**
-1. Navegar a: `C:\apache-tomcat-10.x\conf\`
-2. Abrir `server.xml` con un editor de texto
-3. Buscar la línea:
-   ```xml
-   <Connector port="8080" protocol="HTTP/1.1"
-   ```
-4. Cambiar `8080` por otro puerto (ej: `8081`, `9090`)
-5. Guardar y reiniciar Tomcat
-6. Acceder a: `http://localhost:8081/AdvancedFinalProject/`
-
-**En Linux/Mac:**
-1. Navegar a: `/opt/tomcat/conf/` o donde esté instalado
-2. Editar `server.xml`:
-   ```bash
-   sudo nano /opt/tomcat/conf/server.xml
-   ```
-3. Cambiar el puerto como arriba
-4. Reiniciar Tomcat:
-   ```bash
-   sudo /opt/tomcat/bin/shutdown.sh
-   sudo /opt/tomcat/bin/startup.sh
-   ```
-
-#### Opción 2: Identificar y detener el proceso que usa el puerto 8080
-
-**En Windows (requiere permisos de administrador):**
-```bash
-# 1. Identificar qué proceso usa el puerto 8080
-netstat -ano | findstr :8080
-
-# 2. Verás algo como: TCP  0.0.0.0:8080  0.0.0.0:0  LISTENING  1234
-#    El número al final (1234) es el PID
-
-# 3. Detener el proceso (reemplazar 1234 con el PID real)
-taskkill /PID 1234 /F
-```
-
-**En Linux/Mac:**
-```bash
-# 1. Identificar el proceso
-sudo lsof -i :8080
-
-# 2. Detener el proceso (reemplazar 1234 con el PID real)
-sudo kill -9 1234
-```
-
-#### Opción 3: Usar NetBeans para cambiar el puerto (No requiere permisos de admin)
-
-Si estás usando NetBeans y **NO tienes permisos de administrador**:
-
-1. Click derecho en el proyecto → **Properties**
-2. En la categoría **Run**
-3. En **Server**, click en el botón **...** junto al servidor
-4. En la configuración del servidor, buscar **HTTP Port**
-5. Cambiar a otro puerto disponible (ej: `8081`, `9090`)
-6. Click **OK** y reiniciar el servidor desde NetBeans
-
-**Nota:** Esta configuración solo afecta a la ejecución desde NetBeans, no al servidor Tomcat global.
-
-### Puerto 8005 ya está en uso (Shutdown Port)
-
-Si ves error sobre el puerto 8005:
-
-1. Abrir `server.xml`
-2. Buscar:
-   ```xml
-   <Server port="8005" shutdown="SHUTDOWN">
-   ```
-3. Cambiar `8005` por otro puerto (ej: `8006`)
+- **Solución:** Verificar que MySQL esté ejecutándose
+- Verificar las credenciales en `ConexionBD.java`
+- Verificar que la base de datos `blog_db` exista
 
 ### Error 404 al acceder a la aplicación
-- **Causa:** La URL o el contexto path son incorrectos
-- **Solución:** 
-  - Verificar que la URL sea correcta: `http://localhost:8080/AdvancedFinalProject/articulos`
-  - Si cambiaste el puerto, usar: `http://localhost:PUERTO/AdvancedFinalProject/articulos`
-  - Verificar en el administrador de Tomcat que la aplicación esté desplegada
+- **Solución:** Verificar que el contexto path sea correcto
+- La URL debe ser: `http://localhost:8080/AdvancedFinalProject/articulos`
 
-### Error: "JSTL tags not working" o `<%@ taglib ... %>` no reconocido
-- **Causa:** JARs de JSTL no están en el classpath
-- **Solución:** 
-  1. Descargar ambos JARs de JSTL 3.0:
-     - `jakarta.servlet.jsp.jstl-api-3.0.0.jar`
-     - `jakarta.servlet.jsp.jstl-3.0.0.jar`
-  2. Colocar en `web/WEB-INF/lib/`
-  3. Reiniciar Tomcat
+### Error: "JSTL tags not working"
+- **Solución:** Verificar que los JARs de JSTL estén en `web/WEB-INF/lib/`
 
-### Cómo usar la página de Setup (Configuración de Base de Datos)
-
-La aplicación incluye una página de configuración web para facilitar la conexión a MySQL:
-
-1. **Acceso automático:** Si la aplicación detecta que no puede conectarse a la BD, te redirigirá automáticamente a `/setup`
-
-2. **Acceso manual:** Navega a `http://localhost:8080/AdvancedFinalProject/setup`
-
-3. **Completar el formulario:**
-   - **Host:** `localhost` (o la IP de tu servidor MySQL)
-   - **Puerto:** `3306` (puerto por defecto de MySQL)
-   - **Base de datos:** `blog_db` (o el nombre que hayas elegido)
-   - **Usuario:** `root` (o tu usuario MySQL)
-   - **Contraseña:** Tu contraseña de MySQL (dejar en blanco si no tiene)
-
-4. **Probar la conexión:** Click en **"Probar Conexión"**
-   - Si es exitosa, verás un mensaje verde ✓
-   - Si falla, verás un mensaje de error con detalles
-
-5. **Guardar configuración:** Click en **"Guardar Configuración"**
-   - Esto guardará las credenciales en `db.properties`
-   - La aplicación estará lista para usar
-
-6. **Problemas comunes en Setup:**
-   - **"Connection refused":** MySQL no está ejecutándose
-   - **"Access denied":** Usuario o contraseña incorrectos
-   - **"Unknown database":** La base de datos `blog_db` no existe (ejecutar script SQL primero)
-
-### Caracteres especiales (tildes, ñ) aparecen mal
-
-- **Causa:** Problema de codificación UTF-8
-- **Solución:** 
-  - Verificar que `CharacterEncodingFilter` esté configurado en `web.xml`
-  - Verificar que los archivos JSP tengan: `<%@ page contentType="text/html;charset=UTF-8" %>`
-  - En MySQL, verificar que las tablas usen `utf8mb4_unicode_ci`
-
-### Error de compilación en NetBeans
-
-- **Causa:** Dependencias faltantes o configuración incorrecta
-- **Solución:**
-  1. Click derecho en el proyecto → **Clean and Build**
-  2. Verificar que todos los JARs estén en `web/WEB-INF/lib/`
-  3. Click derecho en el proyecto → **Properties** → **Libraries** → Verificar que Tomcat esté configurado
-
-### La aplicación funciona pero las rutas `/admin/*` muestran error 403
-
-- **Causa:** No has iniciado sesión o la sesión expiró
-- **Solución:** 
-  - Navegar a `http://localhost:8080/AdvancedFinalProject/login`
-  - Iniciar sesión con credenciales válidas (ver sección [Credenciales de Acceso](#credenciales-de-acceso))
-  - El filtro `AuthFilter` protege automáticamente las rutas `/admin/*`
+### Puerto 8080 ya en uso
+- **Solución:** Cambiar el puerto de Tomcat editando `conf/server.xml`
+- O detener el proceso que esté usando el puerto 8080
 
 ## 📝 Licencia
 
@@ -564,16 +377,9 @@ Este proyecto fue desarrollado con fines educativos como parte de un trabajo uni
 
 ## 👥 Autores
 
-| Nombre Completo | Código |
-|-----------------|--------|
-| Dylan David Silva Orrego | 20242020130 |
-| Maria Alejandra Munevar Barrera | 20242020145 |
-
-**Profesora:** Lilia Marcela Espinosa Rodríguez  
-**Materia:** Programación Avanzada  
-**Universidad:** Universidad Distrital Francisco José de Caldas  
-**Facultad:** Facultad de Ingeniería  
-**Programa:** Ingeniería de Sistemas
+* **Alejandra Munevar** - Universidad Distrital Francisco José de Caldas
+* **Dylan Silva** - Universidad Distrital Francisco José de Caldas
+* **Sergio Moreno** - Universidad Distrital Francisco José de Caldas
 
 ---
 

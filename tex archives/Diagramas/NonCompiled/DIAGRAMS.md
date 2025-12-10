@@ -326,256 +326,60 @@ graph TD
 
 ## 3. Diagrama de Casos de Uso
 
-```mermaid
-graph LR
-    subgraph Sistema["Sistema Odally | Blog"]
-        UC1[Ver Lista de Artículos]
-        UC2[Leer Artículo Completo]
-        UC3[Registrarse]
-        UC4[Iniciar Sesión]
-        UC5[Cerrar Sesión]
-        UC6[Crear Artículo]
-        UC7[Editar Artículo]
-        UC8[Eliminar Artículo]
-        UC9[Ver Dashboard]
-        UC10[Gestionar Usuarios]
-        UC11[Cambiar Rol Usuario]
-        UC12[Eliminar Usuario]
-        UC13[Configurar Base de Datos]
-    end
-    
-    Visitante([Visitante])
-    Autor([Usuario Autor])
-    Admin([Administrador])
-    
-    Visitante --> UC1
-    Visitante --> UC2
-    Visitante --> UC3
-    Visitante --> UC4
-    
-    Autor --> UC1
-    Autor --> UC2
-    Autor --> UC4
-    Autor --> UC5
-    Autor --> UC6
-    Autor --> UC7
-    Autor --> UC8
-    Autor --> UC9
-    
-    Admin --> UC1
-    Admin --> UC2
-    Admin --> UC4
-    Admin --> UC5
-    Admin --> UC6
-    Admin --> UC7
-    Admin --> UC8
-    Admin --> UC9
-    Admin --> UC10
-    Admin --> UC11
-    Admin --> UC12
-    Admin --> UC13
-    
-    UC10 ..> UC11 : includes
-    UC10 ..> UC12 : includes
 ```
+@startuml
+left to right direction
 
-## 4. Diagrama de Secuencia: Autenticación de Usuario
+actor Visitante
+actor "Usuario Autor" as Autor
+actor Administrador
 
-```mermaid
-sequenceDiagram
-    actor Usuario
-    participant Browser
-    participant LoginServlet
-    participant IUsuarioDAO
-    participant MySQLUsuarioDAO
-    participant ConexionBD
-    participant PasswordUtil
-    participant MySQL
-    
-    Usuario->>Browser: Envía credenciales (username, password)
-    Browser->>LoginServlet: POST /login
-    LoginServlet->>IUsuarioDAO: buscarPorUsername(username)
-    IUsuarioDAO->>MySQLUsuarioDAO: buscarPorUsername(username)
-    MySQLUsuarioDAO->>ConexionBD: getConexion()
-    ConexionBD->>ConexionBD: Obtener del pool
-    ConexionBD-->>MySQLUsuarioDAO: Connection
-    MySQLUsuarioDAO->>MySQL: SELECT * FROM usuarios WHERE username=?
-    MySQL-->>MySQLUsuarioDAO: ResultSet
-    MySQLUsuarioDAO->>MySQLUsuarioDAO: Mapear ResultSet a Usuario
-    MySQLUsuarioDAO->>ConexionBD: cerrarConexion(conn)
-    MySQLUsuarioDAO-->>IUsuarioDAO: Usuario
-    IUsuarioDAO-->>LoginServlet: Usuario
-    
-    alt Usuario encontrado
-        LoginServlet->>PasswordUtil: verificarPassword(inputPassword, usuario.password)
-        PasswordUtil->>PasswordUtil: hashPassword(inputPassword)
-        PasswordUtil->>PasswordUtil: compare(hash, storedHash)
-        PasswordUtil-->>LoginServlet: boolean
-        
-        alt Password correcto
-            LoginServlet->>LoginServlet: Crear sesión HTTP
-            LoginServlet->>LoginServlet: session.setAttribute("usuario", usuario)
-            LoginServlet-->>Browser: Redirect a /admin/articulos
-            Browser-->>Usuario: Dashboard mostrado
-        else Password incorrecto
-            LoginServlet-->>Browser: Forward a login.jsp con error
-            Browser-->>Usuario: "Contraseña incorrecta"
-        end
-    else Usuario no encontrado
-        LoginServlet-->>Browser: Forward a login.jsp con error
-        Browser-->>Usuario: "Usuario no encontrado"
-    end
-```
+rectangle "Sistema Odally | Blog" {
+  usecase "Ver Lista de Artículos" as UC1
+  usecase "Leer Artículo Completo" as UC2
+  usecase "Registrarse" as UC3
+  usecase "Iniciar Sesión" as UC4
+  usecase "Cerrar Sesión" as UC5
+  usecase "Crear Artículo" as UC6
+  usecase "Editar Artículo" as UC7
+  usecase "Eliminar Artículo" as UC8
+  usecase "Ver Dashboard" as UC9
+  usecase "Gestionar Usuarios" as UC10
+  usecase "Cambiar Rol Usuario" as UC11
+  usecase "Eliminar Usuario" as UC12
+  usecase "Configurar Base de Datos" as UC13
+  
+  UC10 ..> UC11 : includes
+  UC10 ..> UC12 : includes
+}
 
-## 5. Diagrama de Secuencia: Reconexión Automática a BD
+Visitante --> UC1
+Visitante --> UC2
+Visitante --> UC3
+Visitante --> UC4
 
-```mermaid
-sequenceDiagram
-    actor Usuario
-    participant Servlet
-    participant DAO
-    participant ConexionBD
-    participant MySQL
-    
-    Usuario->>Servlet: Solicita listar artículos
-    Servlet->>DAO: listarTodos()
-    DAO->>ConexionBD: getConexion()
-    
-    ConexionBD->>ConexionBD: getConnectionFromPool()
-    
-    alt Conexión disponible en pool
-        ConexionBD->>ConexionBD: Validar conexión (testOnBorrow)
-        ConexionBD->>MySQL: SELECT 1
-        
-        alt Conexión válida
-            MySQL-->>ConexionBD: OK
-            ConexionBD-->>DAO: Connection
-        else Conexión inválida
-            ConexionBD->>ConexionBD: Cerrar conexión inválida
-            ConexionBD->>MySQL: Crear nueva conexión
-            MySQL-->>ConexionBD: Nueva Connection
-            ConexionBD-->>DAO: Connection
-        end
-    else Pool vacío
-        ConexionBD->>ConexionBD: Intentar crear nueva (intento 1/3)
-        ConexionBD->>MySQL: DriverManager.getConnection()
-        
-        alt Conexión exitosa
-            MySQL-->>ConexionBD: Connection
-            ConexionBD-->>DAO: Connection
-        else Fallo de conexión
-            ConexionBD->>ConexionBD: Esperar 1000ms (backoff)
-            ConexionBD->>ConexionBD: Reintentar (intento 2/3)
-            ConexionBD->>MySQL: DriverManager.getConnection()
-            
-            alt Reintento exitoso
-                MySQL-->>ConexionBD: Connection
-                ConexionBD-->>DAO: Connection
-            else Fallo persistente
-                ConexionBD->>ConexionBD: Esperar 2000ms (backoff exponencial)
-                ConexionBD->>ConexionBD: Reintentar (intento 3/3)
-                ConexionBD->>MySQL: DriverManager.getConnection()
-                
-                alt Tercer intento exitoso
-                    MySQL-->>ConexionBD: Connection
-                    ConexionBD-->>DAO: Connection
-                else Fallo definitivo
-                    ConexionBD-->>DAO: SQLException("No se pudo conectar")
-                    DAO-->>Servlet: SQLException
-                    Servlet-->>Usuario: Error de conexión
-                end
-            end
-        end
-    end
-```
+Autor --> UC1
+Autor --> UC2
+Autor --> UC4
+Autor --> UC5
+Autor --> UC6
+Autor --> UC7
+Autor --> UC8
+Autor --> UC9
 
-## 6. Diagrama de Despliegue
-
-```mermaid
-graph TB
-    subgraph "Cliente"
-        Browser[Navegador Web]
-    end
-    
-    subgraph "Servidor de Aplicaciones"
-        subgraph "Apache Tomcat 10+"
-            WebApp[JavaWebBlog.war]
-            subgraph "Aplicación"
-                JSPs[JSP Pages]
-                Servlets[Servlets]
-                Filters[Filters]
-                DAOs[DAO Layer]
-                ConnPool[Connection Pool]
-            end
-        end
-    end
-    
-    subgraph "Servidor de Base de Datos"
-        MySQL[(MySQL 8.0+)]
-        BlogDB[(blog_db)]
-    end
-    
-    Browser -->|HTTP/HTTPS| WebApp
-    JSPs --> Servlets
-    Servlets --> Filters
-    Servlets --> DAOs
-    DAOs --> ConnPool
-    ConnPool -->|JDBC| MySQL
-    MySQL --> BlogDB
-    
-    style Browser fill:#e3f2fd
-    style WebApp fill:#fff3e0
-    style MySQL fill:#e8f5e9
-    style BlogDB fill:#c8e6c9
-```
-
-## 7. Diagrama de Componentes
-
-```mermaid
-graph TD
-    subgraph "Frontend"
-        UI[User Interface<br/>JSP + JSTL + Bootstrap]
-    end
-    
-    subgraph "Middleware"
-        FC[Filter Chain<br/>- CharacterEncodingFilter<br/>- DatabaseCheckFilter<br/>- AuthFilter]
-        SC[Servlet Container<br/>- ArticuloServlet<br/>- AdminArticuloServlet<br/>- AdminUsuariosServlet<br/>- LoginServlet<br/>- SetupServlet]
-    end
-    
-    subgraph "Business Logic"
-        Model[Domain Model<br/>- Usuario<br/>- Articulo]
-        Utils[Utilities<br/>- PasswordUtil]
-    end
-    
-    subgraph "Data Access"
-        DAOInt[DAO Interfaces<br/>- IArticuloDAO<br/>- IUsuarioDAO]
-        DAOImpl[DAO Implementations<br/>- MySQLArticuloDAO<br/>- MySQLUsuarioDAO]
-        CP[Connection Pool<br/>ConexionBD Singleton]
-    end
-    
-    subgraph "External"
-        DB[(MySQL Database<br/>blog_db)]
-    end
-    
-    UI --> FC
-    FC --> SC
-    SC --> Model
-    SC --> Utils
-    SC --> DAOInt
-    DAOInt -.implemented by.-> DAOImpl
-    DAOImpl --> CP
-    DAOImpl --> Model
-    CP --> DB
-    
-    style UI fill:#e1f5ff
-    style FC fill:#fff9c4
-    style SC fill:#fff4e1
-    style Model fill:#e8f5e9
-    style Utils fill:#f1f8e9
-    style DAOInt fill:#f3e5f5
-    style DAOImpl fill:#e1bee7
-    style CP fill:#ffccbc
-    style DB fill:#ffebee
+Administrador --> UC1
+Administrador --> UC2
+Administrador --> UC4
+Administrador --> UC5
+Administrador --> UC6
+Administrador --> UC7
+Administrador --> UC8
+Administrador --> UC9
+Administrador --> UC10
+Administrador --> UC11
+Administrador --> UC12
+Administrador --> UC13
+@enduml
 ```
 
 ## Notas sobre los Diagramas
@@ -604,7 +408,7 @@ graph TD
 ---
 
 **Proyecto:** Odally | Blog  
-**Equipo:** Dylan David Silva Orrego, Maria Alejandra Munevar Barrera  
+**Equipo:** Dylan David Silva Orrego, Maria Alejandra Munevar Barrera, Sergio Leonardo Moreno Granado
 **Profesora:** Lilia Marcela Espinosa Rodríguez  
 **Universidad Distrital Francisco José de Caldas - 2025**
 

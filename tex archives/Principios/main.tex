@@ -14,6 +14,13 @@
 \usepackage{caption}
 \usepackage{csquotes}
 
+% IMPORTANTE: Este documento requiere XeLaTeX para compilar debido al uso de fuentes personalizadas
+% Usar: xelatex main.tex
+\usepackage{fontspec}
+\setmainfont{Source Sans Pro}
+\setsansfont{Source Sans Pro}
+\setmonofont{Source Code Pro}[Scale=MatchLowercase]
+
 % Configuración de colores para listings
 \definecolor{codebg}{rgb}{0.95,0.95,0.95}
 \definecolor{codeframe}{rgb}{0.82,0.82,0.82}
@@ -51,6 +58,7 @@
 
 \begin{titlepage}
     \centering
+    \includegraphics[width=6cm]{figures/UDLogo.png}\\[1cm]
     \vspace*{1cm}
     
     {\LARGE Universidad Distrital Francisco José de Caldas\par}
@@ -58,16 +66,16 @@
     {\large Ingeniería de Sistemas\par}
     \vspace{2cm}
     
-    {\huge\bfseries Principios de Ingeniería de Software\par}
-    {\huge\bfseries y Patrones de Diseño\par}
+    {\huge\bfseries Principios y Patrones de Diseño\par}
     \vspace{0.5cm}
-    {\LARGE Proyecto: Odally | Blog\par}
+    {\LARGE Proyecto: \textit{Odally | Blog}\par}
     \vspace{1.5cm}
     
     {\large
     \begin{tabular}{ll}
     \textbf{Estudiantes:} & Dylan David Silva Orrego -- 20242020130 \\
-                          & Maria Alejandra Munevar Barrera -- 20242020145
+                          & Maria Alejandra Munevar Barrera -- 20242020145 \\
+                          & Sergio Leonardo Moreno Granado -- 20242020091
     \end{tabular}\par}
     \vspace{1.5cm}
     
@@ -389,6 +397,8 @@ public class MySQLArticuloDAO implements IArticuloDAO {
 }
 \end{lstlisting}
 
+\newpage
+
 \textbf{Flujo de dependencias:}
 \begin{verbatim}
     [ArticuloServlet]  ---depende--->  [IArticuloDAO]
@@ -422,14 +432,14 @@ Estos principios ayudan a decidir qué clases deben ir juntas en un paquete.
 
 \textbf{Aplicación:} El paquete \texttt{com.blog.dao} es una unidad cohesiva de reutilización:
 
-\begin{lstlisting}
+\begin{verbatim}
 com.blog.dao/
-    ├── ConexionBD.java         # Singleton de conexión
-    ├── IArticuloDAO.java       # Interfaz
-    ├── MySQLArticuloDAO.java   # Implementación
-    ├── IUsuarioDAO.java
-    └── MySQLUsuarioDAO.java
-\end{lstlisting}
+    +── ConexionBD.java         # Singleton de conexión
+    +── IArticuloDAO.java       # Interfaz
+    +── MySQLArticuloDAO.java   # Implementación
+    +── IUsuarioDAO.java
+    +── MySQLUsuarioDAO.java
+\end{verbatim}
 
 Todo el paquete se puede reutilizar como unidad en otro proyecto que necesite acceso a datos de un blog.
 
@@ -457,6 +467,8 @@ Estos principios guían las dependencias entre paquetes.
 \subsubsection{ADP - Acyclic Dependencies Principle}
 
 \textbf{Definición:} ``El grafo de dependencias de paquetes no debe contener ciclos'' \cite{martin2017clean}.
+
+\newpage
 
 \textbf{Aplicación en el Proyecto:}
 
